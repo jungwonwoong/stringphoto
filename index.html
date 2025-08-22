@@ -1,2 +1,581 @@
-<h1>stringphoto</h1>
-<p>test</p>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>String Art Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 32px 24px 16px 24px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    header svg {
+      width: 56px;
+      height: 56px;
+    }
+    .site-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+    .site-desc {
+      font-size: 1.1rem;
+      color: #666;
+      margin-top: 4px;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px 16px 16px;
+    }
+    .main-action {
+      margin: 32px 0 48px 0;
+      text-align: center;
+    }
+    .main-action button {
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      padding: 16px 40px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(108,99,255,0.08);
+      transition: background 0.2s;
+    }
+    .main-action button:hover {
+      background: #554ee0;
+    }
+    .guestbook {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      padding: 24px 20px 16px 20px;
+      margin-bottom: 32px;
+    }
+    .guestbook-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #6c63ff;
+    }
+    .guestbook-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .guestbook-form input, .guestbook-form textarea {
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .guestbook-form input:focus, .guestbook-form textarea:focus {
+      border: 1.5px solid #6c63ff;
+    }
+    .guestbook-form button {
+      align-self: flex-end;
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+    .guestbook-form button:hover {
+      background: #554ee0;
+    }
+    .guestbook-list {
+    }
+    .guestbook-entry {
+      border-bottom: 1px solid #f1f1f1;
+      padding: 8px 0;
+    }
+    .guestbook-entry:last-child {
+      border-bottom: none;
+    }
+    .guestbook-entry .name {
+      font-weight: 700;
+      color: #444;
+      margin-right: 8px;
+    }
+    .guestbook-entry .date {
+      font-size: 0.85em;
+      color: #aaa;
+      margin-left: 6px;
+    }
+    .guestbook-entry .msg {
+      margin-top: 2px;
+      color: #333;
+      white-space: pre-line;
+    }
+    footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 0.95rem;
+      padding: 18px 0 10px 0;
+      background: none;
+    }
+    @media (max-width: 600px) {
+      header { flex-direction: column; gap: 8px; padding: 18px 8px 8px 8px; }
+      .site-title { font-size: 1.3rem; }
+      main { padding: 12px 2px 2px 2px; }
+      .main-columns { flex-direction: column; gap: 16px; }
+      .guestbook, .resource-section { max-width: 100%; }
+      .guestbook { padding: 12px 4px 8px 4px; }
+    }
+    .main-columns {
+      display: flex;
+      flex-direction: row;
+      gap: 32px;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto 32px auto;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .main-columns .guestbook, .main-columns .resource-section {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .resource-section { max-width: 600px; margin: 0 auto 32px auto; background: #fff; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); padding: 24px 20px 16px 20px; }
+    .resource-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; color: #6c63ff; }
+    .resource-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+    .resource-list { margin-top: 10px; }
+    .resource-item { border-bottom: 1px solid #f1f1f1; padding: 8px 0; }
+    .resource-notice { background: #f8f1ff; color: #6c63ff; padding: 8px; border-radius: 8px; margin-bottom: 10px; }
+    .resource-meta { margin-bottom: 4px; }
+    .resource-type { background: #6c63ff; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 8px; }
+    .resource-title { font-weight: 600; color: #333; }
+    .resource-uploader { color: #666; font-size: 0.9em; margin-left: 8px; }
+    .resource-date { color: #999; font-size: 0.8em; margin-left: 8px; }
+    .resource-desc { color: #555; margin: 4px 0; font-size: 0.9em; }
+    .resource-link { margin-top: 6px; }
+    .resource-link a { color: #6c63ff; text-decoration: none; padding: 4px 8px; background: #f0f0ff; border-radius: 4px; display: inline-block; margin-right: 8px; }
+    .resource-link a:hover { background: #e0e0ff; }
+    
+    /* 카테고리 버튼 스타일 */
+    .resource-categories {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .category-btn {
+      background: #f0f0f0;
+      color: #666;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .category-btn:hover {
+      background: #e0e0e0;
+    }
+    
+    .category-btn.active {
+      background: #6c63ff;
+      color: white;
+      border-color: #6c63ff;
+    }
+    
+    /* 카테고리 선택 스타일 */
+    .resource-form select {
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border 0.2s;
+      background: white;
+    }
+    
+    .resource-form select:focus {
+      border: 1.5px solid #6c63ff;
+    }
+    
+    /* 이미지 슬라이더 스타일 */
+    .image-slider-container {
+      width: 100%;
+      height: 20vh;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin-bottom: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .image-slider {
+      display: flex;
+      height: 100%;
+      animation: slideLeft 30s linear infinite;
+      align-items: center;
+    }
+    
+    .image-slider img {
+      height: 80%;
+      width: auto;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 0 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+    
+    .image-slider img:hover {
+      transform: scale(1.05);
+    }
+    
+    @keyframes slideLeft {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+    
+    .slider-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 0 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- SVG 로고 -->
+    <span id="logo"></span>
+    <div>
+      <div class="site-title">String Art Gallery</div>
+      <div class="site-desc">실로 그리는 예술, String Art의 세계에 오신 것을 환영합니다!</div>
+    </div>
+  </header>
+  <main>
+    <!-- 이미지 슬라이더 -->
+    <div class="image-slider-container">
+      <div class="image-slider" id="image-slider">
+        <!-- 이미지들이 동적으로 로드됩니다 -->
+      </div>
+    </div>
+    
+    <div class="main-action">
+      <button onclick="location.href='indexstringart.html'" style="margin-left:16px;background:#ffb347;">String Art 시작하기</button>
+      <button onclick="location.href='circle_numbers_html_p_5.html'" style="margin-left:16px;background:#ffb347;">Circle Numbers image</button>
+      <button onclick="location.href='buy.html'" style="margin-left:16px;background:#ffb347;">구매정보</button>
+    </div>
+    <div class="main-columns">
+      <section class="guestbook">
+        <div class="guestbook-title">방명록</div>
+        <form class="guestbook-form" id="guestbook-form">
+          <input type="text" id="guestbook-name" placeholder="이름" maxlength="12" required />
+          <textarea id="guestbook-msg" placeholder="메시지를 남겨주세요" rows="2" maxlength="1000" required></textarea>
+          <button type="submit">남기기</button>
+        </form>
+        <div class="guestbook-list" id="guestbook-list"></div>
+      </section>
+      <section class="resource-section">
+        <div class="resource-title">자료실</div>
+        <div class="resource-categories">
+          <!-- 카테고리 버튼들이 동적으로 생성됩니다 -->
+        </div>
+        <form class="resource-form" id="resource-form" enctype="multipart/form-data">
+          <select id="resource-category" required>
+            <!-- 카테고리 옵션들이 동적으로 생성됩니다 -->
+          </select>
+          <input type="text" id="resource-title" placeholder="제목" maxlength="60" required />
+          <input type="text" id="resource-uploader" placeholder="업로더 이름" maxlength="20" />
+          <textarea id="resource-desc" placeholder="설명" rows="2" maxlength="200"></textarea>
+          <input type="file" id="resource-file" accept="*/*,image/*,video/*" />
+          <input type="url" id="resource-link" placeholder="외부 링크 (선택)" />
+          <button type="submit">업로드</button>
+        </form>
+        <div class="resource-list" id="resource-list"></div>
+      </section>
+    </div>
+  </main>
+  <footer>
+    &copy; 2024 String Art Gallery. All rights reserved.
+  </footer>
+  <script>
+    // SVG 로고 동적 삽입
+    fetch('resources/smallholder.svg').then(r=>r.text()).then(svg=>{
+      document.getElementById('logo').innerHTML = svg;
+    });
+
+    // 이미지 슬라이더 기능
+    function loadSliderImages() {
+      const sliderContainer = document.getElementById('image-slider');
+      
+      // showbox 폴더에서 이미지 파일들을 가져오는 함수
+      function loadImagesFromShowbox() {
+        // 일반적인 이미지 파일명들 (사용자가 업로드할 가능성이 높은 이름들)
+        const commonImageNames = [];
+
+        for(let i=0;i<100;i++) {
+            commonImageNames.push('image'+i+'.png');
+        }
+        
+        let loadedImages = [];
+        let checkedCount = 0;
+        
+        function checkNextImage() {
+          if (checkedCount >= commonImageNames.length) {
+            // 모든 이미지를 확인했는데 로드된 것이 없으면 플레이스홀더 표시
+            if (loadedImages.length === 0) {
+              sliderContainer.innerHTML = '<div class="slider-placeholder">showbox 폴더에 이미지를 업로드해주세요<br><small>지원 형식: JPG, PNG, GIF, WEBP</small><br><small>파일명 예시: image1.jpg, photo.png, 1.jpg</small></div>';
+            } else {
+              createSliderWithImages(loadedImages);
+            }
+            return;
+          }
+          
+          const imgSrc = 'showbox/' + commonImageNames[checkedCount];
+          const testImage = new Image();
+          
+          testImage.onload = function() {
+            loadedImages.push(imgSrc);
+            checkedCount++;
+            checkNextImage();
+          };
+          
+          testImage.onerror = function() {
+            checkedCount++;
+            checkNextImage();
+          };
+          
+          testImage.src = imgSrc;
+        }
+        
+        function createSliderWithImages(imageList) {
+          if (imageList && imageList.length > 0) {
+            let html = '';
+            // 이미지를 여러 번 복사해서 무한 루프 효과를 만듭니다
+            for (let i = 0; i < 3; i++) {
+              imageList.forEach(imgSrc => {
+                html += `<img src="${imgSrc}" alt="String Art Gallery" onerror="this.style.display='none'">`;
+              });
+            }
+            sliderContainer.innerHTML = html;
+          }
+        }
+        
+        // 이미지 확인 시작
+        checkNextImage();
+      }
+      
+      // 페이지 로드 시 이미지 로드
+      loadImagesFromShowbox();
+    }
+
+    // 방명록 기능 (MySQL+PHP 연동)
+    const form = document.getElementById('guestbook-form');
+    const nameInput = document.getElementById('guestbook-name');
+    const msgInput = document.getElementById('guestbook-msg');
+    const listDiv = document.getElementById('guestbook-list');
+
+    function loadEntries() {
+      fetch('guestbook.php')
+        .then(r => r.json())
+        .then(entries => {
+          listDiv.innerHTML = entries.map(e => `
+            <div class="guestbook-entry">
+              <span class="name">${e.name}</span>
+              <span class="date">${e.date.replace('T',' ').slice(0,16)}</span>
+              <div class="msg">${e.msg}</div>
+            </div>
+          `).join('') || '<div style="color:#bbb;text-align:center;">아직 방명록이 없습니다.</div>';
+        });
+    }
+
+    form.onsubmit = function(e) {
+      e.preventDefault();
+      const name = nameInput.value.trim() || '익명';
+      const msg = msgInput.value.trim();
+      if (!msg) return;
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('msg', msg);
+      fetch('guestbook.php', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(() => {
+          loadEntries();
+          nameInput.value = '';
+          msgInput.value = '';
+        });
+    };
+
+    loadEntries();
+    // ===== 자료실 기능 =====
+    let currentCategory = 'all';
+    
+    // 카테고리 설정 - 사용자가 원하는 이름으로 수정 가능
+    // 키: 데이터베이스에 저장될 값, 값: 화면에 표시될 이름
+    const categories = {
+      'all': '전체보기',
+      'machine': '머신제작자료',  // 스트링아트 머신 만들기 관련 자료
+      'request': '요청자료',      // 방문자들의 스트링아트 요청 자료
+      'result': '결과물자료'      // 스트링아트 요청 건에 대한 결과물 자료
+    };
+    
+    function loadResources(category = 'all') {
+      currentCategory = category;
+      const url = category === 'all' ? 'resources.php' : `resources.php?category=${category}`;
+      
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          console.log('자료실 데이터:', data); // 디버깅용
+          let html = '';
+          // 공지사항
+          if (data.notice) {
+            html += `<div class="resource-notice"><b>공지</b> ${data.notice.title} - ${data.notice.description}</div>`;
+          }
+          // 자료 리스트
+          html += (data.list || []).map(r => {
+            // 디버깅: 각 자료 항목의 정보 출력
+            console.log('자료 항목:', r);
+            console.log('링크 존재 여부:', !!r.link);
+            console.log('링크 값:', r.link);
+            console.log('URL 값:', r.url);
+            
+            // 링크만 있는 경우 타입을 'link'로 설정
+            const hasLink = r.link || r.external_link || r.url_link;
+            const hasUrl = r.url && r.url.startsWith('http');
+            const displayType = (hasLink || hasUrl) && !r.url?.includes('/uploads/') ? 'link' : r.type;
+            return `
+            <div class="resource-item">
+              <div class="resource-meta">
+                <span class="resource-type">${displayType}</span>
+                <span class="resource-title">${r.title}</span>
+                <span class="resource-uploader">${r.uploader}</span>
+                <span class="resource-date">${r.uploaded_at}</span>
+              </div>
+              <div class="resource-desc">${r.description || ''}</div>
+              <div class="resource-link">
+                ${(r.type === 'image' || r.type === 'video' || r.type === 'file') && r.url && !r.url.startsWith('http') ? (
+                  r.type === 'image' ? `<img src="${r.url}" style="max-width:120px;">`
+                  : r.type === 'video' ? `<video src="${r.url}" controls style="max-width:180px;"></video>`
+                  : `<a href="${r.url}" download>[파일 다운로드]</a>`
+                ) : ''}
+                ${(r.link || r.external_link || r.url_link) ? `<a href="${r.link || r.external_link || r.url_link}" target="_blank" style="color: #6c63ff; text-decoration: none; padding: 4px 8px; background: #f0f0ff; border-radius: 4px; display: inline-block;">🔗 외부 링크</a>` : ''}
+                ${r.url && r.url.startsWith('http') ? `<a href="${r.url}" target="_blank" style="color: #6c63ff; text-decoration: none; padding: 4px 8px; background: #f0f0ff; border-radius: 4px; display: inline-block;">🔗 ${r.url}</a>` : ''}
+                ${!r.url && !hasLink && !(r.url && r.url.startsWith('http')) ? '<span style="color:#999;font-size:0.9em;">링크 없음</span>' : ''}
+              </div>
+            </div>
+          `;
+          }).join('') || '<div style="color:#bbb;text-align:center;">자료가 없습니다.</div>';
+          document.getElementById('resource-list').innerHTML = html;
+        });
+    }
+
+    // 카테고리 버튼 동적 생성
+    function createCategoryButtons() {
+      const container = document.querySelector('.resource-categories');
+      container.innerHTML = '';
+      
+      Object.entries(categories).forEach(([key, name]) => {
+        const btn = document.createElement('button');
+        btn.className = `category-btn ${key === 'all' ? 'active' : ''}`;
+        btn.setAttribute('data-category', key);
+        btn.textContent = name;
+        btn.addEventListener('click', function() {
+          // 모든 버튼에서 active 클래스 제거
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          // 클릭된 버튼에 active 클래스 추가
+          this.classList.add('active');
+          // 해당 카테고리 자료 로드
+          const category = this.getAttribute('data-category');
+          loadResources(category);
+        });
+        container.appendChild(btn);
+      });
+    }
+    
+    // 카테고리 선택 옵션 동적 생성
+    function createCategoryOptions() {
+      const select = document.getElementById('resource-category');
+      select.innerHTML = '<option value="">카테고리 선택</option>';
+      
+      Object.entries(categories).forEach(([key, name]) => {
+        if (key !== 'all') { // 전체보기는 선택 옵션에서 제외
+          const option = document.createElement('option');
+          option.value = key;
+          option.textContent = name;
+          select.appendChild(option);
+        }
+      });
+    }
+
+    document.getElementById('resource-form').onsubmit = function(e) {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('title', document.getElementById('resource-title').value.trim());
+      formData.append('description', document.getElementById('resource-desc').value.trim());
+      formData.append('uploader', document.getElementById('resource-uploader').value.trim() || '익명'); // 업로더 이름 또는 익명
+      formData.append('category', document.getElementById('resource-category').value); // 카테고리 추가
+      if (document.getElementById('resource-file').files[0]) {
+        formData.append('file', document.getElementById('resource-file').files[0]);
+      }
+      if (document.getElementById('resource-link').value.trim()) {
+        formData.append('link', document.getElementById('resource-link').value.trim());
+      }
+      fetch('resources.php', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(() => {
+          loadResources(currentCategory); // 현재 카테고리로 다시 로드
+          this.reset();
+        });
+    };
+
+    // 자료실 초기화
+    createCategoryButtons();
+    createCategoryOptions();
+    loadResources();
+    
+    // 이미지 슬라이더 초기화
+    loadSliderImages();
+  </script>
+</body>
+</html> 

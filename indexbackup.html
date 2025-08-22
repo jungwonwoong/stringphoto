@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>String Art Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 32px 24px 16px 24px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    header svg {
+      width: 56px;
+      height: 56px;
+    }
+    .site-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+    .site-desc {
+      font-size: 1.1rem;
+      color: #666;
+      margin-top: 4px;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px 16px 16px;
+    }
+    .main-action {
+      margin: 32px 0 48px 0;
+      text-align: center;
+    }
+    .main-action button {
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      padding: 16px 40px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(108,99,255,0.08);
+      transition: background 0.2s;
+    }
+    .main-action button:hover {
+      background: #554ee0;
+    }
+    .guestbook {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      padding: 24px 20px 16px 20px;
+      margin-bottom: 32px;
+    }
+    .guestbook-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #6c63ff;
+    }
+    .guestbook-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .guestbook-form input, .guestbook-form textarea {
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .guestbook-form input:focus, .guestbook-form textarea:focus {
+      border: 1.5px solid #6c63ff;
+    }
+    .guestbook-form button {
+      align-self: flex-end;
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+    .guestbook-form button:hover {
+      background: #554ee0;
+    }
+    .guestbook-list {
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .guestbook-entry {
+      border-bottom: 1px solid #f1f1f1;
+      padding: 8px 0;
+    }
+    .guestbook-entry:last-child {
+      border-bottom: none;
+    }
+    .guestbook-entry .name {
+      font-weight: 700;
+      color: #444;
+      margin-right: 8px;
+    }
+    .guestbook-entry .date {
+      font-size: 0.85em;
+      color: #aaa;
+      margin-left: 6px;
+    }
+    .guestbook-entry .msg {
+      margin-top: 2px;
+      color: #333;
+      white-space: pre-line;
+    }
+    footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 0.95rem;
+      padding: 18px 0 10px 0;
+      background: none;
+    }
+    @media (max-width: 600px) {
+      header { flex-direction: column; gap: 8px; padding: 18px 8px 8px 8px; }
+      .site-title { font-size: 1.3rem; }
+      main { padding: 12px 2px 2px 2px; }
+      .guestbook { padding: 12px 4px 8px 4px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- SVG 로고 -->
+    <span id="logo"></span>
+    <div>
+      <div class="site-title">String Art Gallery</div>
+      <div class="site-desc">실로 그리는 예술, String Art의 세계에 오신 것을 환영합니다!</div>
+    </div>
+  </header>
+  <main>
+    <div class="main-action">
+      <button onclick="location.href='indexstringart.html'">String Art 시작하기</button>
+    </div>
+    <section class="guestbook">
+      <div class="guestbook-title">방명록</div>
+      <form class="guestbook-form" id="guestbook-form">
+        <input type="text" id="guestbook-name" placeholder="이름" maxlength="12" required />
+        <textarea id="guestbook-msg" placeholder="메시지를 남겨주세요" rows="2" maxlength="120" required></textarea>
+        <button type="submit">남기기</button>
+      </form>
+      <div class="guestbook-list" id="guestbook-list"></div>
+    </section>
+  </main>
+  <footer>
+    &copy; 2024 String Art Gallery. All rights reserved.
+  </footer>
+  <script>
+    // SVG 로고 동적 삽입
+    fetch('resources/smallholder.svg').then(r=>r.text()).then(svg=>{
+      document.getElementById('logo').innerHTML = svg;
+    });
+
+    // 방명록 기능 (MySQL+PHP 연동)
+    const form = document.getElementById('guestbook-form');
+    const nameInput = document.getElementById('guestbook-name');
+    const msgInput = document.getElementById('guestbook-msg');
+    const listDiv = document.getElementById('guestbook-list');
+
+    function loadEntries() {
+      fetch('guestbook.php')
+        .then(r => r.json())
+        .then(entries => {
+          listDiv.innerHTML = entries.map(e => `
+            <div class="guestbook-entry">
+              <span class="name">${e.name}</span>
+              <span class="date">${e.date.replace('T',' ').slice(0,16)}</span>
+              <div class="msg">${e.msg}</div>
+            </div>
+          `).join('') || '<div style="color:#bbb;text-align:center;">아직 방명록이 없습니다.</div>';
+        });
+    }
+
+    form.onsubmit = function(e) {
+      e.preventDefault();
+      const name = nameInput.value.trim() || '익명';
+      const msg = msgInput.value.trim();
+      if (!msg) return;
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('msg', msg);
+      fetch('guestbook.php', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(() => {
+          loadEntries();
+          nameInput.value = '';
+          msgInput.value = '';
+        });
+    };
+
+    loadEntries();
+  </script>
+</body>
+</html> 

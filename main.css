@@ -1,0 +1,26 @@
+body {
+	margin: 0;
+	background-color: #ffffff;
+	color: #fff;
+	font-family: Monospace;
+	font-size: 13px;
+	line-height: 24px;
+	overscroll-behavior: none;
+}
+#controlBox {
+	position: absolute;
+	width: 100%;
+	text-align: right;
+}
+#startButton {
+	text-align: right;
+	width: 100%;
+	height: 20px;
+}
+#SNBox {
+	text-align: right;
+	width: 100%;
+}
+#strokesNumber {
+	width: 100px;
+}

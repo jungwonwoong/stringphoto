@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 930.76292 930.76303"
+   width="930.76294"
+   height="930.763"
+   version="1.1"
+   id="svg27"
+   sodipodi:docname="스트링아트프레임및받침대all (1).dxf"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview27"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1" />
+  <desc
+     id="desc1">스트링아트프레임및받침대all (1).dxf - scale = 1.000000, origin = (0.000000, 0.000000), method = manual</desc>
+  <defs
+     id="defs4" />
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="0"
+     id="g27"
+     transform="translate(68.530893,-95.879262)">
+    <path
+       id="path29"
+       style="fill:#000000;stroke:#000000;stroke-width:1.41334;stroke-linejoin:bevel;stroke-opacity:0.995769"
+       d="M 396.84961,96.585938 A 464.67532,464.67484 0 0 0 -67.824219,561.25977 464.67532,464.67484 0 0 0 396.84961,1025.9355 464.67532,464.67484 0 0 0 861.52539,561.25977 464.67532,464.67484 0 0 0 396.84961,96.585938 Z m 0,56.697262 A 407.97607,407.97607 0 0 1 804.82617,561.25977 407.97607,407.97607 0 0 1 396.84961,969.23633 407.97607,407.97607 0 0 1 -11.126953,561.25977 407.97607,407.97607 0 0 1 396.84961,153.2832 Z"
+       inkscape:export-filename="framemedium.svg"
+       inkscape:export-xdpi="105.95547"
+       inkscape:export-ydpi="105.95547" />
+  </g>
+</svg>

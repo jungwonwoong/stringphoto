@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>jwwoong</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+		<script src="receive.js"></script>
+	</head>
+	<body>
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.162.0/three.module.js",
+					"three/addons/": "./jsm/"
+				}
+			}
+		</script>
+
+		<script type="module">
+
+			import * as THREE from 'three';
+			import Stats from 'three/addons/libs/stats.module.js';
+			import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+			import WebGL from 'three/addons/capabilities/WebGL.js';
+			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+			import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+			import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+			import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
+			// 데이터 유효성 검사 및 기본값 설정
+			let array01 = data ? data.split(',') : [299,278,293,309,14,301,275,305,11,302,269,289,265,303,19,55,39,59,316,55,29,51,317,12,304,264,291,48,31,312,51,22,302,274,0,50,35,77,97,157,107,122,168,152,108,163,106,125,141,109,162,147,109,180,195,211,179,199,174,205,186,115,134,110,146,169,206,184,112,140,97,148,108,181,210,141,94,150,169,202,187,114,136,100,160,202,178,214,148,101,158,203,166,116,131,102,156,223,189,122,145,216,177,219,144,91,134,208,183,113,139,211,169,125,192,215,146,98,159,221,173,208,163,100,73,18,308,273,288,270,301,277,9,306,34,78,94,152,224,239,211,136,89,74,24,58,315,56,17,2,273,5,55,25,72,16,58,4,65,0,58,13,310,269,253,303,268,316,61,314,274,306,263,292,47,32,53,20,302,255,295,276,300,282,297,254,10,55,18,256,291,49,24,262,20,307,33,79,112,145,170,201,162,218,152,105,164,217,175,197,182,116,133,92,159,228,155,103,153,221,144,88,137,98,74,15,257,17,70,10,311,262,27,54,295,52,21,255,9,272,287,39,74,114,182,107,149,96,160,220,174,229,158,222,143,108,177,211,129,206,165,216,183,106,150,225,172,200,163,227,242,223,141,111,187,123,84,59,12,69,7,278,3,66,91,153,216,139,114,156,238,158,93,153,223,171,231,157,206,125,213,193,121,190,222,246,303,251,298,279,257,12,64,5,57,15,253,298,184,214,166,237,161,219,147,86,138,219,191,119,147,225,144,123,209,132,101,72,21,261,294,51,34,265,318,66,319,60,11,252,300,186,126,167,102,71,2,306,37,285,41,288,257,312,251,6,272,309,32,80,96,151,224,182,236,169,232,156,98,143,89,154,238,160,242,173,230,189,110,161,95,152,235,163,217,182,298,259,14,55,23,50,30,261,312,61,8,257,241,157,86,68,11,276,4,70,104,128,212,194,118,180,198,167,213,122,87,146,103,162,236,155,87,58,14,254,19,65,9,253,311,268,290,50,6,70,26,48,293,262,36,264,311,248,221,157,112,185,297,260,295,180,237,141,91,161,220,249,303,13,255,316,250,219,175,308,171,306,173,234,164,95,157,84,154,115,181,232,187,299,183,104,145,232,134,32,266,285,45,309,172,235,133,98,76,38,124,143,230,137,208,124,80,21,57,88,154,222,172,209,182,292,49,1,72,115,214,193,316,63,21,253,2,59,22,126,227,170,248,318,61,201,127,233,167,291,267,282,42,128,226,149,85,143,239,155,211,118,99,73,0,254,302,257,301,259,315,251,12,75,8,312,190,216,179,105,67,316,28,53,296,267,43,127,25,259,231,136,34,284,178,107,66,8,248,162,219,135,90,153,239,302,266,297,189,204,65,108,191,229,114,215,154,213,116,151,84,233,248,4,246,164,257,319,247,163,127,21,77,37,261,314,252,16,56,9,59,0,246,190,314,256,20,54,290,168,212,131,29,115,228,125,79,155,81,29,265,309,175,307,262,44,149,97,119,33,137,223,245,5,77,126,239,139,35,265,26,303,248,160,223,152,240,166,93,132,235,184,207,156,141,49,145,218,174,310,170,210,180,102,280,99,276,14,122,36,286,159,249,317,192,301,185,206,64,109,176,217,251,3,71,119,232,122,19,113,230,140,171,247,9,73,1,76,23,125,240,1,244,6,270,294,277,98,281,43,70,205,187,306,254,308,168,251,307,176,239,157,128,220,134,234,83,158,287,105,69,209,140,38,260,35,305,174,269,55,89,149,40,259,167,91,51,186,296,255,168,226,131,42,146,14,29,262,16,119,88,235,90,46,293,181,99,148,227,127,232,185,101,135,31,260,39,71,204,157,288,35,134,47,89,141,170,307,172,245,124,39,13,123,231,188,298,264,305,197,59,13,32,308,59,202,306,21,153,298,141,229,109,294,55,289,271,299,240,175,111,63,207,177,238,303,184,103,279,104,8,78,249,135,232,27,129,156,86,233,177,295,256,167,309,17,254,1,78,158,44,91,111,293,136,218,150,118,28,116,61,194,221,172,311,259,46,148,224,120,15,145,51,267,11,310,44,260,22,119,239,2,192,55,266,292,166,146,226,27,122,69,206,249,77,220,202,65,125,290,269,7,250,131,240,168,83,236,306,176,212,63,9,114,30,231,161,286,115,100,275,38,95,278,177,224,188,111,16,144,52,89,118,237,87,272,42,152,300,258,318,67,4,239,39,274,107,92,43,150,238,179,277,96,183,215,140,244,125,187,46,135,227,175,268,41,283,93,237,132,243,45,294,132,211,68,8,141,207,12,124,230,112,62,246,175,316,70,121,232,137,291,53,267,89,238,312,171,90,73,248,79,2,233,26,54,263,18,252,303,243,148,217,137,210,156,23,118,34,240,117,60,162,285,114,293,38,21,185,129,219,154,19,185,201,58,85,150,300,15,123,299,194,4,87,137,256,302,281,176,99,37,143,100,270,50,198,213,67,301,149,86,238,126,221,21,251,317,227,102,289,126,212,57,257,282,94,165,215,231,139,303,29,309,270,88,67,199,148,14,77,269,104,71,116,223,181,218,163,283,35,235,111,20,219,78,268,148,45,12,247,69,196,3,253,169,261,296,194,176,89,234,133,171,309,58,198,304,24,117,91,234,154,94,173,307,39,93,218,139,9,311,242,46,146,12,65,301,286,271,173,158,300,265,33,241,107,225,151,166,103,288,159,203,101,291,124,53,193,0,133,48,146,242,149,213,312,247,124,221,76,7,242,30,161,241,312,233,184,210,314,263,43,130,251,301,55,258,46,194,228,162,29,244,298,124,67,106,277,153,41,148,98,288,161,233,134,119,17,74,248,306,189,59,123,17,151,236,131,28,187,97,42,279,115,237,82,159,237,40,286,112,174,213,56,190,230,144,210,291,254,311,28,305,243,10,181,282,55,285,176,81,250,302,165,126,246,71,152,229,170,235,87,29,53,143,106,12,121,216,191,51,252,292,133,41,255,138,222,183,22,251,201,44,266,104,282,83,7,196,107,318,226,105,259,274,172,227,100,33,289,157,16,311,234,180,276,111,216,79,147,90,232,136,4,84,69,45,91,238,39,192,64,15,275,103,286,175,82,17,261,167,118,18,188,313,170,258,60,76,246,144,298,151,135,247,318,135,234,307,162,230,31,102,129,252,187,49,132,249,12,266,295,68,123,303,143,14,158,57,124,11,214,195,227,164,282,114,18,67,264,301,72,204,95,150,241,38,269,61,256,134,248,123,312,7,258,32,291,196,45,150,39,20,64,205,94,29,287,160,244,27,1,109,241,174,106,257,47,147,229,166,199,226,181,47,241,130,153,224,170,60,300,160,31,238,114,61,46,160,235,83,267,101,7,180,24,155,82,285,92,40,264,172,84,156,304,237,122,94,230,138,50,127,237,169,307,19,157,80,30,271,10,253,297,179,227,177,192,222,20,82,8,108,294,174,307,36,232,175,39,265,286,258,78,162,128,316,233,16,212,123,86,139,252,60,217,95,238,120,96,202,18,103,188,27,163,69,210,45,259,278,100,304,248,80,198,174,72,244,3,118,232,129,44,155,223,206,164,119,281,56,88,234,253,58,209,157,303,272,116,172,300,189,276,37,141,230,146,131,295,97,167,253,48,7,115,292,112,50,159,253,33,191,1,55,250,169,246,26,258,316,221,236,132,1,248,72,103,270,59,184,45,30,180,245,82,152,226,136,237,117,271,318,194,306,198,68,258,298,275,302,253,14,123,202,21,215,141,262,21,151,230,130,25,9,314,59,118,247,65,110,240,86,143,95,308,17,252,142,222,156,227,14,153,61,214,163,279,294,52,312,231,63,78,4,69,191,307,171,228,192,62,232,93,174,219,18,41,186,307,236,32,120,232,124,311,266,299,254,8,67,207,60,310,166,113,318,254,50,117,248,99,290,257,126,56,242,298,137,304,319,111,183,6,89,304,204,176,126,279,153,20,73,173,248,45,265,109,190,126,51,298,147,237,113,62,157,217,178,307,126,26,110,80,246,231,132,219,203,0,263,304,132,200,293,61,251,54,272,94,240,112,297,281,85,145,244,129,227,67,46,9,107,11,180,208,63,151,201,290,28,243,4,26,264,48,159,12,55,262,68,104,238,87,13,301,91,245,0,128,298,193,306,127,287,202,223,122,274,5,179,38,271,96,190,71,248,56,166,182,300,145,230,163,286,160,72,8,161,192,4,103,140,40,174,222,165,57,122,299,198,39,306,112,97,150,230,170,135,254,296,208,47,143,232,117,36,257,27,46,119,242,54,254,92,72,143,242,129,278,36,192,0,251,86,4,303,81,0,229,66,108,244,302,108,260,51,158,288,45,3,107,173,60,196,49,282,101,260,64,129,262,277,299,118,188,153,229,135,235,150,208,79,256,39,289,134,33,159,187,120,237,105,264,249,116,318,151,227,185,102,238,112,24,97,82,240,156,139,123,183,297,200,19,85,154,225,201,279,123,227,197,2,181,198,59,24,213,143,50,15,114,315];
+			let array03 = pinsdata ? pinsdata.split(',') : [700,350,700,357,700,364,699,371,699,377,698,384,698,391,697,398,696,405,695,412,693,418,692,425,690,432,689,438,687,445,685,452,683,458,681,465,678,471,676,478,673,484,671,490,668,497,665,503,662,509,659,515,655,521,652,527,648,533,645,539,641,544,637,550,633,556,629,561,625,567,621,572,616,577,612,582,607,588,602,593,597,597,593,602,588,607,582,612,577,616,572,621,567,625,561,629,556,633,550,637,544,641,539,645,533,648,527,652,521,655,515,659,509,662,503,665,497,668,490,671,484,673,478,676,471,678,465,681,458,683,452,685,445,687,438,689,432,690,425,692,418,693,412,695,405,696,398,697,391,698,384,698,377,699,371,699,364,700,357,700,350,700,343,700,336,700,329,699,323,699,316,698,309,698,302,697,295,696,288,695,282,693,275,692,268,690,262,689,255,687,248,685,242,683,235,681,229,678,222,676,216,673,210,671,203,668,197,665,191,662,185,659,179,655,173,652,167,648,161,645,156,641,150,637,144,633,139,629,133,625,128,621,123,616,118,612,112,607,107,602,103,597,98,593,93,588,88,582,84,577,79,572,75,567,71,561,67,556,63,550,59,544,55,539,52,533,48,527,45,521,41,515,38,509,35,503,32,497,29,490,27,484,24,478,22,471,19,465,17,458,15,452,13,445,11,438,10,432,8,425,7,418,5,412,4,405,3,398,2,391,2,384,1,377,1,371,0,364,0,357,0,350,0,343,0,336,1,329,1,323,2,316,2,309,3,302,4,295,5,288,7,282,8,275,10,268,11,262,13,255,15,248,17,242,19,235,22,229,24,222,27,216,29,210,32,203,35,197,38,191,41,185,45,179,48,173,52,167,55,161,59,156,63,150,67,144,71,139,75,133,79,128,84,123,88,118,93,112,98,107,103,103,107,98,112,93,118,88,123,84,128,79,133,75,139,71,144,67,150,63,156,59,161,55,167,52,173,48,179,45,185,41,191,38,197,35,203,32,210,29,216,27,222,24,229,22,235,19,242,17,248,15,255,13,262,11,268,10,275,8,282,7,288,5,295,4,302,3,309,2,316,2,323,1,329,1,336,0,343,0,350,0,357,0,364,0,371,1,377,1,384,2,391,2,398,3,405,4,412,5,418,7,425,8,432,10,438,11,445,13,452,15,458,17,465,19,471,22,478,24,484,27,490,29,497,32,503,35,509,38,515,41,521,45,527,48,533,52,539,55,544,59,550,63,556,67,561,71,567,75,572,79,577,84,582,88,588,93,593,98,597,103,602,107,607,112,612,118,616,123,621,128,625,133,629,139,633,144,637,150,641,156,645,161,648,167,652,173,655,179,659,185,662,191,665,197,668,203,671,210,673,216,676,222,678,229,681,235,683,242,685,248,687,255,689,262,690,268,692,275,693,282,695,288,696,295,697,302,698,309,698,316,699,323,699,329,700,336,700,343]; //핀위치데이터
+			let holderSvg, holderbotSvg, frameSvg , framesize;
+			let frameAllposZ,holderSvgposZ,holderbotSvgposZ,frameAllposY;
+			let viewway = 0;
+			let pinCoverOpacity = 0;
+			if(array03.length*0.5==240){
+				holderSvg='resources/smallholder.svg';
+				holderbotSvg='resources/smallholderbot.svg';
+				frameSvg = 'resources/framesmall.svg';
+				framesize = 110;
+				frameAllposZ=-3.2;
+				frameAllposY=0;
+				holderSvgposZ=-1.75
+				holderbotSvgposZ=-22
+			}
+			if(array03.length*0.5==280) {
+				holderSvg='resources/mediumholder.svg';
+				holderbotSvg='resources/mediumholderbot.svg';
+				frameSvg = 'resources/framemedium.svg';
+				framesize = 128;
+				frameAllposZ=17.5;
+				frameAllposY=-0.3;
+				holderSvgposZ=18.5
+				holderbotSvgposZ=-12
+			}
+			if(array03.length*0.5==320) {
+				holderSvg='resources/largeholder.svg';
+				holderbotSvg='resources/largeholderbot.svg';
+				frameSvg = 'resources/framelarge.svg';
+				framesize = 146;
+				frameAllposZ=38;
+				frameAllposY=1.9;
+				holderSvgposZ=39.5
+				holderbotSvgposZ=-2
+			}
+			let array02=array03.map((x) => (x*((framesize)/(SIZE || 700))))
+			let lineSegments;
+			let stats,floorMat;
+			let brightness = 0.1;
+			let lineMaterial,ambientLight,roomlight,frameRing2;
+			let camera, scene, renderer, controls;
+			let frameTickness = 6.4+24*0.15;
+			let frameAll;
+			let dirLight,bulbMat,wbulbMat,LEDlight,wLEDlight,spotLight, diffuser, pinMesh,pinAll;
+			let pingeometry; 
+			let	pinmaterial,arcmaterial;
+			let LEDlightMesh,LEDholderMesh,wLEDlightMesh,wLEDholderMesh;
+			let cube1;
+			let v1 = new THREE.Vector3(-100, 100, 100)
+			const params = {
+				strokesNumber: array01.length,
+				Layout: 'table top',
+				roombrightness: true,
+				LED: false,
+				wLED: false,
+				pinCover: false,
+			};
+			if ( WebGL.isWebGLAvailable() ) {
+				init();
+				animate();
+			} else {
+				const warning = WebGL.getWebGLErrorMessage();
+				document.getElementById( 'container' ).appendChild( warning );
+			}
+			function init() {
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0x222244 );
+				scene.fog = new THREE.Fog( 0x222244, 800, 1000 );
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
+				camera.position.set(0,50,320)
+				
+				{//room light
+				ambientLight = new THREE.AmbientLight( 0xffffff, 0 ); // soft white light
+				scene.add( ambientLight );
+				spotLight = new THREE.DirectionalLight(0xffdab9, 0)
+				spotLight.position.set(50, 200, 100)
+				spotLight.castShadow = true
+				spotLight.shadow.mapSize.width = 2560
+				spotLight.shadow.mapSize.height = 2560
+				spotLight.shadow.camera.near = 0.5
+				spotLight.shadow.camera.far = 25000
+				spotLight.shadow.camera.left = -1000
+				spotLight.shadow.camera.right = 1000
+				spotLight.shadow.camera.top = 1000
+				spotLight.shadow.camera.bottom = -1000
+				spotLight.shadow.radius = 5
+				spotLight.shadow.blurSamples = 250
+				scene.add( spotLight );
+				renderer = new THREE.WebGLRenderer({ antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.shadowMap.enabled = true;
+				renderer.toneMapping = THREE.ReinhardToneMapping;
+				document.body.appendChild( renderer.domElement );
+				stats = new Stats();
+				document.body.appendChild( stats.dom );
+				}
+				{//back light set
+				var backlightset = new THREE.Group();
+				const bulbGeometry = new THREE.CircleGeometry( 2, 16, 8 );
+				LEDlight = new THREE.PointLight( 0xffee88, 400 );
+				bulbMat = new THREE.MeshStandardMaterial( {
+					emissive: 0xffffee,
+					emissiveIntensity: 500,
+					color: 0xffff00
+				} );
+				LEDlightMesh = new THREE.Mesh(bulbGeometry, bulbMat );
+				LEDlight.add(LEDlightMesh);
+				LEDlight.position.set( 0, 12.4, -55 );
+				LEDlight.rotateX(-Math.PI/4)
+				LEDlight.castShadow = true;
+				LEDlight.shadow.blurSamples=25
+				LEDlight.shadow.radius = 7;
+				LEDlight.intensity=0;
+
+				backlightset.add( LEDlight );
+				
+				const LEDholderGeo = new THREE.BoxGeometry( 8, 20, 3 ); 
+				const LEDholderMat = new THREE.MeshStandardMaterial( {
+					color: 0xf0e68c,
+				}); 
+				LEDholderMesh = new THREE.Mesh( LEDholderGeo, LEDholderMat ); 
+				LEDholderMesh.position.set(0,10,-55);
+				LEDholderMesh.rotateX(-Math.PI/4);
+				LEDholderMesh.castShadow = true;
+				backlightset.add( LEDholderMesh );
+				scene.add(backlightset);
+				}
+				{//ground
+				const planeGeometry = new THREE.PlaneGeometry( 600, 600 );
+				const planeMaterial = new THREE.MeshPhongMaterial( {
+					color: 0x999999,
+					shininess: 0,
+					specular: 0x111111
+				} );
+				const ground = new THREE.Mesh( planeGeometry, planeMaterial );
+				ground.rotation.x = - Math.PI / 2;
+				ground.scale.multiplyScalar( 3 );
+				ground.castShadow = true;
+				ground.receiveShadow = true;
+				scene.add( ground );
+				}
+				{//wall back light set
+				var wallGroup = new THREE.Group();
+				var wbacklightset = new THREE.Group();
+				const wbulbGeometry = new THREE.CircleGeometry( 2, 16, 8 );
+				wLEDlight = new THREE.PointLight( 0xffee88, 400 );
+				wbulbMat = new THREE.MeshStandardMaterial( {
+					emissive: 0xffffee,
+					emissiveIntensity: 500,
+					color: 0xffff00
+				} );
+				wLEDlightMesh = new THREE.Mesh(wbulbGeometry, wbulbMat );
+				wLEDlight.add(wLEDlightMesh);
+				wLEDlight.position.set( 0, 0, 1.6 );
+				wLEDlight.castShadow = true;
+				wLEDlight.shadow.blurSamples=25
+				wLEDlight.shadow.radius = 7;
+				wLEDlight.intensity=0;
+
+				wbacklightset.add( wLEDlight );
+				
+				const wLEDholderGeo = new THREE.BoxGeometry( 8, 20, 3 ); 
+				const wLEDholderMat = new THREE.MeshStandardMaterial( {
+					color: 0xf0e68c,
+				}); 
+				wLEDholderMesh = new THREE.Mesh( wLEDholderGeo, wLEDholderMat ); 
+				wLEDholderMesh.position.set(0,0,0);
+				wLEDholderMesh.castShadow = true;
+				wbacklightset.add( wLEDholderMesh );
+				wbacklightset.rotateX(Math.PI/2)
+				wbacklightset.position.set(0,200,25)
+				wallGroup.add(wbacklightset);
+				const wallGeo = new THREE.BoxGeometry( 300, 400, 30 ); 
+				const wallMat = new THREE.MeshStandardMaterial( {
+					color: 0xffffff,
+				}); 
+				var wallMesh = new THREE.Mesh( wallGeo, wallMat ); 
+				wallMesh.position.set(0,200,0);
+				wallMesh.castShadow = true;
+				wallMesh.receiveShadow =true;
+				wallGroup.add(wallMesh);
+				wallGroup.position.set(300,0,-100);
+				wallGroup.rotateY(-Math.PI/6);
+				scene.add(wallGroup);
+				}
+				var group2;
+				var svgScale=0.15;
+				{//frame holder svg loader
+					const loader = new SVGLoader();
+					var svgmaterial = new THREE.MeshStandardMaterial( {
+						color: framecolor || "#000000"
+					});
+					var extrudeOptions = {
+						curveSegments: 60,
+						bevelEnabled: false,
+						depth: 24,
+					};
+					var group = new THREE.Group();
+					group.position.set( 0, 36*svgScale, holderSvgposZ );
+					group.scale.set( svgScale, svgScale, svgScale );
+					group.rotation.set(-Math.PI/2,0,Math.PI/4);
+					scene.add( group );
+					loader.load(holderSvg,(data) => {
+						for( var path of data.paths )
+							for( var shape of SVGLoader.createShapes( path ) )
+							{
+									var geometry = new THREE.ExtrudeGeometry( shape, extrudeOptions ),
+									mesh = new THREE.Mesh( geometry, svgmaterial );
+									mesh.castShadow=true;
+									mesh.receiveShadow = true;
+									geometry.center();
+									group.add( mesh );
+							}
+					})
+					var group1 = new THREE.Group();
+					group1.position.set( 0, 12*svgScale, holderbotSvgposZ );
+					group1.scale.set( svgScale, svgScale, svgScale );
+					group1.rotation.set(Math.PI/2,0, 0);
+					
+					scene.add( group1 );
+					loader.load(holderbotSvg,(data) => {
+						for( var path of data.paths )
+							for( var shape of SVGLoader.createShapes( path ) )
+							{
+									var geometry = new THREE.ExtrudeGeometry( shape, extrudeOptions ),
+									mesh = new THREE.Mesh( geometry, svgmaterial );
+									mesh.castShadow=true;
+									mesh.receiveShadow=true;
+									geometry.center();
+									group1.add( mesh );
+							}
+					})
+					group2 = new THREE.Group();
+					group2.position.set( 0, 0, -0.8 );
+					group2.scale.set( svgScale, svgScale, svgScale );
+					group2.rotation.set(0,0, 0);
+					scene.add( group2 );
+					loader.load(frameSvg,(data) => {
+						var mesh;
+						for( var path of data.paths )
+							for( var shape of SVGLoader.createShapes( path ) )
+							{
+									var geometry = new THREE.ExtrudeGeometry( shape, extrudeOptions );
+
+									mesh = new THREE.Mesh( geometry, svgmaterial );
+									geometry.center();
+									group2.add( mesh );
+							}
+					})
+				}
+				{//difuser set
+				const cylinderGeo1 = new THREE.CylinderGeometry( framesize/2, framesize/2, 0.1, 64 );
+				const cylinderMat1 = new THREE.MeshPhongMaterial( { 
+					emissive: 0xffffff,
+					emissiveIntensity: 0.004,
+					color: 0xffffff
+				} );
+				diffuser = new THREE.Mesh( cylinderGeo1,cylinderMat1);
+				diffuser.position.set( 0, 0, 0.5 );
+				diffuser.receiveShadow = true;
+				diffuser.castShadow = true;
+				diffuser.rotation.set(Math.PI/2,0,0);
+				}
+				{//pincover eva form ring
+					var outerRadius = framesize/2+1;
+					var innerRadius = framesize/2-1;
+					var height = 2;
+					var arcShape = new THREE.Shape();
+					arcShape.moveTo(outerRadius * 2, outerRadius);
+					arcShape.absarc(outerRadius, outerRadius, outerRadius, 0, Math.PI * 2, false);
+					var holePath = new THREE.Path();
+					holePath.moveTo(outerRadius + innerRadius, outerRadius);
+					holePath.absarc(outerRadius, outerRadius, innerRadius, 0, Math.PI * 2, true);
+					arcShape.holes.push(holePath);
+					var arcgeometry = new THREE.ExtrudeGeometry(arcShape, {
+						depth: height,
+						bevelEnabled: false,
+						steps: 1,
+						curveSegments: 60
+					});
+					arcgeometry.center();
+					arcmaterial = new THREE.MeshStandardMaterial( { 
+						color: pincovercolor || "#000000", 
+						//transparent : true,
+						//opacity: 1,
+					} );
+					frameRing2 = new THREE.Mesh( arcgeometry, arcmaterial );
+					//frameRing2.castShadow = true;
+					frameRing2.position.set( 0, 0, 2 );
+					
+				}
+				{//group of frame's parts
+				frameAll = new THREE.Group();
+				pinAll = new THREE.Group();
+				pingeometry = new THREE.BoxGeometry( 0.2, 0.2, 3 ); 
+				pinmaterial = new THREE.MeshStandardMaterial( {
+					color: 0xffd700,
+					transparent : params.pinCover,
+					opacity:0
+				}); 
+				for(var i=0;i<array03.length;i=i+2) {
+					pinMesh = new THREE.Mesh( pingeometry, pinmaterial ); 
+					pinMesh.position.set((array02[i]-framesize/2),-(array02[i+1]-framesize/2),2.2);
+					pinAll.add( pinMesh );
+				}
+				const lineGeometry = new THREE.BufferGeometry();
+				lineGeometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( array01.length * 2 * 3 ), 3 ) );
+				lineGeometry.computeBoundingSphere();
+				lineMaterial = new THREE.LineBasicMaterial({
+					color: 0x000000,
+					transparent:true,
+					opacity:0.9,
+				});
+				lineSegments = new THREE.LineSegments( lineGeometry, lineMaterial );
+
+				frameAll.add(diffuser);
+				frameAll.add(pinAll);
+				frameAll.add(group2);//frame
+				frameAll.add(frameRing2);//pin cover
+				frameAll.add(lineSegments);//strokes
+				frameAll.rotateX(-Math.PI/50);
+				frameAll.position.set(0,framesize/2+frameTickness+frameAllposY,frameAllposZ);
+				v1.set(frameAll.position.x, frameAll.position.y, frameAll.position.z);
+				scene.add(frameAll)
+				}
+
+				{//OrbitTarget
+				const geometry = new THREE.BoxGeometry()
+				//the cube used for .lerp
+				cube1 = new THREE.Mesh(
+					geometry,
+					new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0 })
+				)
+				cube1.position.copy(frameAll.position);
+				scene.add(cube1)
+				}
+				{//OrbitControl
+				controls = new OrbitControls( camera, renderer.domElement );
+				controls.enableDamping = true;
+				controls.dampingFactor = 0.05;
+				//controls.target.copy(cube1.position);
+				controls.update();
+				}
+
+				{//gui
+				const gui = new GUI();
+				gui.add( params, 'strokesNumber',0, array01.length).step(1).name('Strokes Number');
+				gui.add( params, 'Layout', [ 'table top', 'wall hanging'] ).name('Uses').onChange( function (a) {
+					if(a == 'table top') {
+						frameAll.position.set(0,framesize/2+frameTickness+frameAllposY,frameAllposZ);
+						frameAll.rotateY(Math.PI/6);
+						frameAll.rotateX(-Math.PI/50);
+						v1.set(frameAll.position.x, frameAll.position.y, frameAll.position.z);
+						camera.position.set(0,50,320)
+					}
+					if(a == 'wall hanging'){
+						var aa = 35*Math.cos(Math.PI/6);
+						var bb = 35*Math.sin(Math.PI/6);
+						frameAll.rotateX(Math.PI/50);
+						frameAll.rotateY(-Math.PI/6);
+						frameAll.position.set(300-bb,200-(framesize/2+frameAllposY),-100+aa);
+						v1.set(frameAll.position.x, frameAll.position.y, frameAll.position.z);
+						camera.position.set(0,50,320)
+					}
+					render();
+
+				} );
+				gui.add( params, 'roombrightness').name('Room Light');
+				gui.add( params, 'LED' ).name('Back Light');
+				gui.add( params, 'wLED' ).name('Wall Back Light');
+				gui.add( params, 'pinCover').name('Pin Covering')
+				}
+			}
+			function updateStrokes() {
+				const strokesCount = params.strokesNumber;
+				let lineNum = 0;
+				const posS = new THREE.Vector3();
+				const posE = new THREE.Vector3();
+				let strokegap = 1.2;
+				for ( let i = 0; i < strokesCount-1; i ++ ) {
+					if(i%200 == 0) strokegap += 0.2;
+					posS.set((array02[array01[i]*2]-framesize/2), -(array02[array01[i]*2+1]-framesize/2), strokegap);
+					posE.set((array02[array01[i+1]*2]-framesize/2), -(array02[array01[i+1]*2+1]-framesize/2), strokegap);
+					lineSegments.geometry.attributes.position.setXYZ( lineNum ++,posS.x, posS.y, posS.z );
+					lineSegments.geometry.attributes.position.setXYZ( lineNum ++, posE.x,posE.y,posE.z );
+				}
+				lineSegments.geometry.setDrawRange( 0, lineNum );
+				lineSegments.geometry.attributes.position.needsUpdate = true;
+			}
+			function animate() { 
+				requestAnimationFrame( animate ); // required if controls.enableDamping or controls.autoRotate are set to true 
+				controls.update(); 
+				cube1.position.lerp(v1, 0.1)
+				controls.target.copy(cube1.position)
+				if(!params.pinCover) frameAll.remove(frameRing2);
+				else frameAll.add(frameRing2);
+				render(); 
+			}
+			function render() {
+				updateStrokes();
+				if(params.Layout=='table top') {
+					if(params.LED) {
+						LEDlight.intensity=4000;
+						diffuser.material.emissiveIntensity=0.1
+						LEDlightMesh.material.emissiveIntensity=500;
+						lineMaterial.opacity=0.4;
+					} else {
+						LEDlight.intensity=0;
+						diffuser.material.emissiveIntensity=0
+						LEDlightMesh.material.emissiveIntensity=0;
+						lineMaterial.opacity=0.7;
+					}
+					if(params.wLED) {
+						wLEDlight.intensity=4000;
+						wLEDlightMesh.material.emissiveIntensity=500;
+					} else {
+						wLEDlight.intensity=0;
+						wLEDlightMesh.material.emissiveIntensity=0;
+					}
+				} else if(params.Layout=='wall hanging') {
+					if(params.wLED) {
+						wLEDlight.intensity=4000;
+						diffuser.material.emissiveIntensity=0.1
+						wLEDlightMesh.material.emissiveIntensity=500;
+						lineMaterial.opacity=0.4;
+					} else {
+						wLEDlight.intensity=0;
+						diffuser.material.emissiveIntensity=0
+						wLEDlightMesh.material.emissiveIntensity=0;
+						lineMaterial.opacity=0.7;
+					}
+					if(params.LED) {
+						LEDlight.intensity=4000;
+						LEDlightMesh.material.emissiveIntensity=500;
+					} else {
+						LEDlight.intensity=0;
+						LEDlightMesh.material.emissiveIntensity=0;
+					}
+				}
+				if(!params.pinCover) {
+					frameAll.add(pinAll);
+					frameRing2.material.transparent=true;
+					pinMesh.material.transparent=false;
+				} else {
+					frameAll.remove(pinAll);
+					pingeometry.dispose();
+					pinmaterial.dispose();
+					//params.pinCover=false;
+					frameRing2.material.transparent=false;
+					pinMesh.material.transparent=true;
+				}
+				if(params.roombrightness) {
+					ambientLight.intensity=0.6;
+					spotLight.intensity= 1;
+					
+				} else {
+					ambientLight.intensity=0.01;
+					spotLight.intensity= 0.02;
+					
+				}
+
+				renderer.render( scene, camera );
+				stats.update()
+			}
+		</script>
+	</body>
+</html>

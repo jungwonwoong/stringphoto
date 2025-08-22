@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>jwwoong</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+	<link type="text/css" rel="stylesheet" href="main.css">
+	<script src="receive.js"></script>
+</head>
+
+<body>
+	<script type="importmap">
+			{
+				"imports": {
+					"three": "./build/three.module.js",
+					"three/addons/": "./jsm/"
+				}
+			}
+		</script>
+	<script src="build/ammo.js"></script>
+	<script type="module">
+		import * as THREE from 'three';
+		import Stats from 'three/addons/libs/stats.module.js';
+		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+		import WebGL from 'three/addons/capabilities/WebGL.js';
+		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+		import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+		import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+		import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+		let deg = [0.00, 1.50, 3.00, 4.50, 6.00, 7.50, 9.00, 10.50, 12.00, 13.50, 15.00, 16.50, 18.00, 19.50, 21.00, 22.50, 24.00, 25.50, 27.00, 28.50, 30.00, 31.50, 33.00, 34.50, 36.00, 37.50, 39.00, 40.50, 42.00, 43.50, 45.00, 46.50, 48.00, 49.50, 51.00, 52.50, 54.00, 55.50, 57.00, 58.50, 60.00, 61.50, 63.00, 64.50, 66.00, 67.50, 69.00, 70.50, 72.00, 73.50, 75.00, 76.50, 78.00, 79.50, 81.00, 82.50, 84.00, 85.50, 87.00, 88.50, 90.00, 91.50, 93.00, 94.50, 96.00, 97.50, 99.00, 100.50, 102.00, 103.50, 105.00, 106.50, 108.00, 109.50, 111.00, 112.50, 114.00, 115.50, 117.00, 118.50, 120.00, 121.50, 123.00, 124.50, 126.00, 127.50, 129.00, 130.50, 132.00, 133.50, 135.00, 136.50, 138.00, 139.50, 141.00, 142.50, 144.00, 145.50, 147.00, 148.50, 150.00, 151.50, 153.00, 154.50, 156.00, 157.50, 159.00, 160.50, 162.00, 163.50, 165.00, 166.50, 168.00, 169.50, 171.00, 172.50, 174.00, 175.50, 177.00, 178.50, 180.00, 181.50, 183.00, 184.50, 186.00, 187.50, 189.00, 190.50, 192.00, 193.50, 195.00, 196.50, 198.00, 199.50, 201.00, 202.50, 204.00, 205.50, 207.00, 208.50, 210.00, 211.50, 213.00, 214.50, 216.00, 217.50, 219.00, 220.50, 222.00, 223.50, 225.00, 226.50, 228.00, 229.50, 231.00, 232.50, 234.00, 235.50, 237.00, 238.50, 240.00, 241.50, 243.00, 244.50, 246.00, 247.50, 249.00, 250.50, 252.00, 253.50, 255.00, 256.50, 258.00, 259.50, 261.00, 262.50, 264.00, 265.50, 267.00, 268.50, 270.00, 271.50, 273.00, 274.50, 276.00, 277.50, 279.00, 280.50, 282.00, 283.50, 285.00, 286.50, 288.00, 289.50, 291.00, 292.50, 294.00, 295.50, 297.00, 298.50, 300.00, 301.50, 303.00, 304.50, 306.00, 307.50, 309.00, 310.50, 312.00, 313.50, 315.00, 316.50, 318.00, 319.50, 321.00, 322.50, 324.00, 325.50, 327.00, 328.50, 330.00, 331.50, 333.00, 334.50, 336.00, 337.50, 339.00, 340.50, 342.00, 343.50, 345.00, 346.50, 348.00, 349.50, 351.00, 352.50, 354.00, 355.50, 357.00, 358.50];
+		let pdata = [12, 19, 1, 37, 20, 0, 46, 15, 40, 239, 47, 236, 42, 233, 44, 13, 33, 2, 36, 21, 216, 14, 47, 8, 35, 229, 39, 16, 31, 3, 18, 214, 24, 219, 9, 46, 237, 41, 238, 48, 6, 37, 238, 205, 2, 45, 27, 218, 13, 208, 236, 212, 19, 45, 10, 34, 0, 50, 5, 204, 15, 32, 221, 23, 239, 211, 21, 225, 39, 234, 46, 18, 216, 29, 44, 232, 43, 235, 213, 25, 218, 17, 47, 7, 36, 239, 204, 10, 55, 6, 202, 0, 208, 22, 223, 238, 49, 1, 207, 237, 38, 1, 201, 13, 50, 11, 33, 220, 239, 48, 3, 199, 9, 53, 12, 222, 207, 19, 42, 14, 49, 23, 46, 26, 212, 238, 139, 89, 115, 100, 85, 117, 88, 126, 84, 118, 99, 116, 91, 125, 85, 133, 83, 127, 81, 119, 83, 130, 87, 118, 94, 148, 102, 162, 104, 166, 111, 91, 144, 95, 110, 167, 108, 170, 106, 164, 111, 85, 136, 92, 124, 86, 132, 82, 128, 79, 121, 166, 109, 169, 103, 167, 120, 80, 129, 152, 137, 166, 116, 88, 140, 165, 149, 98, 154, 134, 166, 105, 172, 123, 93, 108, 173, 120, 75, 122, 164, 113, 167, 101, 170, 125, 89, 112, 163, 141, 160, 107, 174, 112, 169, 107, 176, 111, 90, 138, 165, 110, 92, 146, 112, 151, 97, 155, 133, 167, 126, 83, 112, 172, 103, 84, 121, 74, 112, 158, 143, 122, 173, 111, 153, 136, 166, 128, 81, 133, 232, 214, 15, 199, 6, 54, 8, 205, 4, 51, 1, 206, 23, 214, 234, 209, 239, 43, 11, 58, 17, 203, 12, 48, 236, 138, 86, 119, 76, 111, 175, 108, 168, 115, 162, 135, 171, 124, 159, 142, 89, 105, 176, 121, 172, 114, 163, 101, 172, 109, 177, 106, 66, 103, 78, 125, 156, 117, 144, 226, 37, 223, 31, 13, 197, 6, 49, 16, 60, 14, 200, 2, 35, 227, 40, 24, 205, 236, 135, 233, 216, 231, 44, 24, 202, 3, 52, 10, 198, 16, 47, 21, 53, 15, 59, 10, 209, 235, 133, 172, 107, 77, 126, 155, 130, 223, 206, 3, 152, 96, 165, 112, 69, 114, 72, 118, 166, 123, 162, 119, 174, 109, 179, 107, 87, 102, 169, 114, 176, 110, 166, 146, 227, 143, 224, 9, 201, 25, 47, 13, 60, 20, 57, 9, 195, 14, 205, 224, 132, 233, 137, 91, 70, 105, 77, 117, 167, 95, 78, 129, 161, 138, 171, 115, 81, 112, 73, 117, 164, 97, 63, 26, 42, 237, 50, 236, 139, 154, 135, 231, 48, 237, 149, 0, 203, 23, 64, 96, 166, 125, 219, 128, 163, 118, 176, 101, 174, 105, 169, 123, 74, 107, 65, 25, 112, 182, 117, 71, 31, 47, 4, 201, 28, 211, 234, 134, 163, 147, 228, 201, 19, 195, 6, 41, 234, 129, 218, 126, 164, 100, 16, 190, 18, 105, 82, 101, 169, 116, 167, 109, 180, 106, 81, 131, 234, 205, 227, 148, 119, 155, 40, 1, 47, 238, 203, 8, 201, 12, 198, 26, 112, 171, 99, 62, 27, 42, 5, 55, 82, 124, 220, 127, 163, 139, 233, 212, 137, 237, 209, 6, 190, 117, 32, 200, 29, 115, 191, 15, 101, 84, 54, 14, 192, 10, 91, 169, 94, 67, 22, 108, 178, 110, 172, 111, 185, 17, 197, 3, 138, 225, 142, 126, 229, 145, 225, 202, 2, 153, 41, 149, 238, 135, 83, 123, 173, 100, 177, 111, 23, 52, 235, 140, 162, 144, 169, 136, 232, 46, 5, 211, 74, 55, 7, 208, 45, 23, 66, 95, 12, 61, 9, 193, 114, 184, 18, 103, 174, 121, 167, 115, 68, 21, 109, 67, 102, 79, 124, 165, 180, 101, 17, 187, 11, 96, 174, 114, 192, 33, 68, 93, 170, 115, 151, 33, 118, 149, 43, 25, 199, 234, 43, 210, 68, 113, 172, 127, 213, 231, 125, 164, 133, 223, 139, 2, 208, 71, 89, 51, 236, 150, 40, 18, 107, 62, 105, 181, 197, 28, 114, 195, 235, 58, 204, 237, 134, 171, 114, 180, 120, 36, 66, 211, 17, 201, 10, 38, 158, 47, 227, 212, 232, 127, 221, 141, 87, 54, 205, 68, 101, 23, 186, 116, 157, 39, 122, 166, 132, 147, 44, 209, 70, 108, 181, 10, 188, 172, 90, 9, 92, 69, 20, 109, 185, 14, 30, 196, 4, 151, 43, 157, 50, 161, 104, 73, 88, 52, 99, 178, 121, 147, 238, 130, 76, 214, 230, 158, 37, 192, 4, 83, 216, 140, 0, 209, 27, 57, 13, 95, 225, 49, 64, 104, 182, 14, 103, 168, 109, 176, 87, 216, 64, 26, 131, 167, 111, 66, 206, 232, 131, 217, 62, 200, 46, 207, 119, 203, 188, 19, 104, 63, 98, 220, 81, 177, 103, 170, 121, 35, 67, 203, 1, 154, 128, 190, 171, 155, 51, 201, 6, 60, 10, 97, 53, 154, 231, 132, 112, 175, 88, 169, 125, 191, 22, 107, 29, 56, 236, 210, 23, 59, 12, 49, 163, 137, 122, 205, 10, 114, 196, 13, 186, 107, 5, 82, 217, 74, 214, 86, 225, 129, 47, 19, 181, 80, 178, 114, 164, 135, 180, 24, 73, 97, 172, 77, 238, 192, 31, 156, 39, 160, 145, 51, 33, 188, 9, 207, 133, 42, 152, 32, 69, 119, 171, 102, 26, 187, 28, 205, 135, 230, 155, 94, 174, 237, 97, 77, 110, 24, 58, 108, 4, 62, 205, 72, 112, 22, 215, 93, 7, 194, 236, 176, 83, 104, 167, 106, 75, 23, 128, 237, 136, 161, 116, 195, 48, 148, 44, 126, 81, 167, 5, 61, 0, 130, 45, 201, 116, 150, 27, 118, 14, 174, 89, 12, 105, 58, 152, 4, 43, 17, 191, 116, 174, 8, 226, 201, 3, 85, 181, 77, 208, 38, 20, 191, 6, 143, 120, 166, 151, 26, 72, 30, 52, 136, 44, 131, 172, 9, 112, 75, 209, 224, 36, 159, 229, 125, 176, 221, 97, 182, 79, 94, 54, 106, 174, 99, 181, 204, 186, 7, 228, 142, 37, 152, 24, 201, 15, 173, 76, 239, 131, 150, 43, 195, 62, 109, 3, 153, 232, 123, 19, 73, 221, 47, 130, 189, 44, 140, 161, 111, 184, 92, 174, 110, 86, 179, 205, 0, 218, 91, 13, 220, 66, 18, 94, 237, 138, 166, 124, 42, 211, 67, 218, 98, 9, 106, 48, 65, 103, 176, 11, 113, 193, 237, 131, 174, 118, 181, 22, 183, 114, 167, 119, 72, 201, 111, 84, 187, 6, 230, 141, 8, 108, 186, 85, 53, 109, 199, 19, 54, 140, 218, 75, 18, 60, 1, 99, 167, 123, 157, 42, 232, 196, 112, 167, 118, 208, 229, 156, 49, 89, 14, 40, 7, 189, 0, 41, 158, 115, 192, 44, 181, 116, 28, 101, 50, 146, 44, 143, 53, 167, 15, 105, 224, 175, 237, 206, 55, 139, 124, 194, 63, 106, 78, 128, 202, 69, 97, 230, 200, 55, 153, 23, 178, 217, 119, 16, 103, 183, 76, 102, 235, 76, 176, 108, 172, 237, 44, 184, 8, 39, 66, 215, 197, 107, 223, 65, 234, 210, 78, 170, 142, 7, 85, 120, 154, 41, 26, 153, 128, 71, 113, 17, 195, 37, 159, 119, 172, 100, 47, 231, 138, 198, 213, 77, 129, 165, 9, 114, 166, 126, 238, 168, 111, 197, 41, 186, 95, 210, 69, 177, 219, 94, 17, 182, 93, 220, 131, 75, 11, 204, 43, 148, 131, 164, 181, 110, 20, 36, 163, 143, 49, 228, 40, 64, 0, 156, 223, 81, 56, 73, 25, 104, 190, 84, 207, 25, 193, 43, 132, 230, 123, 195, 91, 232, 45, 127, 79, 149, 34, 164, 32, 100, 37, 217, 127, 209, 17, 32, 135, 53, 163, 115, 176, 99, 67, 205, 6, 43, 185, 96, 176, 112, 12, 170, 111, 96, 78, 237, 62, 177, 86, 224, 102, 220, 123, 149, 47, 90, 225, 174, 228, 209, 93, 223, 109, 183, 47, 108, 21, 149, 42, 144, 161, 216, 179, 74, 18, 39, 205, 119, 166, 133, 157, 120, 198, 40, 238, 43, 162, 6, 21, 106, 176, 93, 78, 176, 86, 0, 76, 54, 189, 4, 212, 62, 9, 34, 186, 201, 7, 152, 9, 139, 175, 100, 169, 236, 95, 53, 3, 93, 40, 189, 32, 112, 53, 144, 230, 169, 108, 174, 21, 201, 70, 176, 98, 180, 65, 222, 36, 117, 172, 125, 149, 63, 112, 173, 38, 149, 27, 200, 108, 73, 184, 85, 226, 48, 99, 226, 172, 154, 2, 138, 56, 18, 208, 177, 6, 203, 68, 12, 107, 188, 111, 180, 199, 58, 14, 106, 224, 92, 187, 13, 96, 50, 193, 8, 198, 75, 178, 63, 167, 129, 145, 116, 30, 150, 41, 214, 94, 181, 42, 23, 90, 146, 13, 185, 216, 129, 21, 193, 219, 118, 169, 104, 176, 88, 202, 132, 161, 119, 169, 111, 174, 102, 45, 91, 18, 127, 166, 140, 121, 40, 159, 111, 10, 76, 98, 229, 47, 189, 21, 76, 123];
+		let cdiv = 240;
+		const range = l => {
+			let i = -1;
+			let res = [];
+			while (++i < l) {
+				res.push(i);
+			}
+			return res;
+		};
+		const range1 = (l, j) => {
+			let i = 0;
+			let res = [];
+			while (Math.abs(i) < Math.abs(l)) {
+
+				res.push(Number((i).toFixed(2)));
+				i=i+j;
+			}
+			return res;
+		};
+		let rotateStep = [];
+		let movingTime = [];
+		let idxplus = [];
+		let idxplusE = 0;
+		let testang = 0;
+		let pinperstep = 40;
+		let deltaold = 0;
+		let num = range(cdiv);
+		for(var k=0;k<pdata.length;k++){
+			let idx = index_arr(num, cdiv, pdata[k])
+			shiftLeft(num, idx, cdiv)
+			if (1 / Math.sin((Math.PI / 180) * deg[idx]) > 0) {
+			if (arr_check(num, (cdiv - idx), pdata[k + 1]) > 0) {//지나가는 경로에 직전핀 보함
+				idxplusE = 2
+				idxplus.push(idxplusE);
+				movingTime.push(cRotate(((idx + idxplus[k])) * pinperstep) / 1000000);
+				
+				testang += idx
+				rotateStep.push(testang-1)
+			} else {
+				idxplusE = 1
+				idxplus.push(idxplusE);
+				movingTime.push(cRotate(((idx + idxplus[k])) * pinperstep) / 1000000);
+				
+				testang += idx
+				rotateStep.push(testang-1)
+			}
+		} else if (1 / Math.sin((Math.PI / 180) * deg[idx]) < 0) {
+			if (arr_check(num, (cdiv - idx), pdata[k + 1]) > 0) {
+				idxplusE = -1
+				idxplus.push(idxplusE);
+				movingTime.push(cRotate((cdiv - (idx + idxplus[k])) * pinperstep) / 1000000);
+				
+				testang -= (cdiv - idx)
+				rotateStep.push(testang-1)
+			} else {
+				idxplusE = -3
+				idxplus.push(idxplusE);
+				movingTime.push(cRotate(((cdiv - (idx + idxplus[k]))) * pinperstep) / 1000000);
+				
+				testang -= (cdiv - idx)
+				rotateStep.push(testang-1)
+			}
+		}
+		}
+		pdata.unshift(0);
+		k = 0;
+		var text;
+		var tcirclesize = 97
+		let goon = false;
+		
+
+		let array02 = []//핀위치데이터
+		let array03 = []//스티커위치
+		var s = 5;
+		var a = tcirclesize
+		var b = tcirclesize
+		var c = tcirclesize
+		var d = 2 * Math.PI / cdiv;
+		for (var i = 0; i < cdiv; i++) {
+			array02.push([(a + c * Math.cos(i * d)) - a, (b + c * Math.sin(i * d)) - a])
+			array03.push([(a + s + (c + s) * Math.cos(i * d)), (b + s + (c + s) * Math.sin(i * d))])
+		}
+		let holderSvg, holderbotSvg, frameSvg, framesize;
+		let frameAllposZ, holderSvgposZ, holderbotSvgposZ, frameAllposY;
+		let lineSegments;
+		let stats, floorMat;
+		let brightness = 0.1;
+		let light, lineMaterial, ambientLight, roomlight, frameRing2;
+		let camera, scene, renderer, controls;
+		let frameTickness = 6.4 + 24 * 0.15;
+		let frameAll;
+		let dirLight, bulbMat, LEDlight, spotLight, diffuser, pinMesh, pinAll;
+		let pingeometry;
+		let pinmaterial;
+		let clock;
+		var gears, disk, frame;
+		
+		let stickerGroup;
+		let tmpTrans, rigidBodies = [], physicsWorld;
+		let pos = new THREE.Vector3();
+		let quat = new THREE.Quaternion();
+		let colGroupRedBall = 2, colGroupGreenBall = 4
+		let p2p, p2p2, p2p22, p2p221;
+		var servom, xslider
+		var params = {
+			strokesNumber: 0,
+			speedValue: 0,
+			startArt: false,
+		};
+		let stopper=false;
+		let xsliderPhysicsMesh = null
+		let xsliderbasePhysicsMesh = null
+		let xsliderbase = null
+		let stopperMesh = null,stopperMesh1 = null,stopperMesh2 = null,stopperMesh3 = null
+		let moveDirection = { left: 0, right: 0, forward: 0, back: 0 }
+		const STATE = { DISABLE_DEACTIVATION: 4 }
+		let needleXn = 0
+		let needleZn = 0
+
+
+		let line = null;
+		Ammo().then(start)
+		function start() {
+			tmpTrans = new Ammo.btTransform();
+			setupPhysicsWorld();
+			init();
+			createJointObjects();
+			setupEventHandlers();
+			animate();
+		}
+		function setupPhysicsWorld() {
+			let collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(),
+				dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration),
+				overlappingPairCache = new Ammo.btDbvtBroadphase(),
+				solver = new Ammo.btSequentialImpulseConstraintSolver();
+			physicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+			physicsWorld.setGravity(new Ammo.btVector3(0, 0, 0));
+		}
+		let gui;
+		function init() {
+			clock = new THREE.Clock();
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color(0x222244);
+			camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 5000);
+			camera.position.set(50, 200, 150)
+			{//room light
+				const ambientLight = new THREE.AmbientLight(0xFFFFFF);
+				ambientLight.intensity = 0.5;
+				scene.add(ambientLight)
+				spotLight = new THREE.DirectionalLight(0xfffafa, 1.5)
+				spotLight.position.set(-50, 200, -100)
+				spotLight.castShadow = true
+				spotLight.shadow.mapSize.width = 2560
+				spotLight.shadow.mapSize.height = 2560
+				spotLight.shadow.camera.near = 0.5
+				spotLight.shadow.camera.far = 25000
+				spotLight.shadow.camera.left = -1000
+				spotLight.shadow.camera.right = 1000
+				spotLight.shadow.camera.top = 1000
+				spotLight.shadow.camera.bottom = -1000
+				spotLight.shadow.radius = 1
+				scene.add(spotLight);
+			}
+			{//sticker of pins number 
+				const loader = new FontLoader();
+				stickerGroup = new THREE.Group();
+				loader.load('fonts/helvetiker_regular.typeface.json', function (font) {
+					const color = 0x000000;
+					const matDark = new THREE.LineBasicMaterial({
+						color: color,
+						side: THREE.DoubleSide
+					});
+					const matLite = new THREE.MeshBasicMaterial({
+						color: color,
+						transparent: true,
+						opacity: 0.4,
+						side: THREE.DoubleSide
+					});
+					for (var i = 0; i < 240; i++) {
+
+						var message = i.toString();
+						var shapes = font.generateShapes(message.padStart(3, " "), 1.9);
+						var geometry = new THREE.ShapeGeometry(shapes);
+						geometry.rotateX(-Math.PI / 2)
+						geometry.rotateY(Math.PI - (Math.PI * i / 120));
+						text = new THREE.Mesh(geometry, matLite);
+						text.geometry.center();
+						text.position.set(array03[i][0] - tcirclesize - s, 109.5, array03[i][1] - tcirclesize - s)
+						stickerGroup.add(text);
+						stickerGroup.position.set(-63.54, 0, 0)
+					}
+					stickerGroup.rotateY(-Math.PI / 120)
+				})
+			}
+			scene.add(stickerGroup);
+			{//ground
+				const planeGeometry = new THREE.PlaneGeometry(2000, 2000);
+				const planeMaterial = new THREE.MeshStandardMaterial({
+					color: 'rgb(255,255,255)',
+				});
+				const ground = new THREE.Mesh(planeGeometry, planeMaterial);
+				ground.name = 'ground';
+				ground.rotation.x = - Math.PI / 2;
+				//ground.scale.multiplyScalar( 3 );
+				ground.receiveShadow = true;
+				scene.add(ground);
+			}
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.shadowMap.enabled = true;
+			renderer.toneMapping = THREE.ReinhardToneMapping;
+			document.body.appendChild(renderer.domElement);
+			stats = new Stats();
+			document.body.appendChild(stats.dom);
+			{//frame
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/frame/obj.mtl", function (materials) {
+					materials.preload();
+					materials.castShadow = true;
+
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load("model/obj/frame/tinker.obj", function (object) {
+						object.traverse(function (child) {
+							if (child instanceof THREE.Mesh) {
+								var box = new THREE.Box3().setFromObject(child);
+								box.getCenter(child.position);
+								child.geometry.center()
+								child.receiveShadow = true;
+							}
+						})
+						object.children[0].geometry.rotateY(Math.PI / 240)
+						object.children[2].geometry.rotateY(Math.PI / 240)
+						object.position.set(0, 0, 0)
+						frame = object;
+						console.log(frame)
+						scene.add(frame);
+					});
+				});
+			}
+			{//disk
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/disk/obj.mtl", function (materials) {
+					materials.preload();
+					materials.castShadow = true;
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load("model/obj/disk/tinker.obj", function (object) {
+						var box = new THREE.Box3().setFromObject(object.children[0]);
+						box.getCenter(object.children[0].position);
+						object.children[0].geometry.center()
+						object.children[0].castShadow = true;
+						object.children[0].receiveShadow = true;
+						object.position.set(0, 0, 0)
+						disk = object;
+						scene.add(disk);
+					});
+				});
+			}
+			{//gears obj mlt	
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/gears/obj.mtl", function (materials) {
+					materials.preload();
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load("model/obj/gears/tinker.obj", function (object) {
+						object.traverse(function (child) {
+							if (child instanceof THREE.Mesh) {
+								var box = new THREE.Box3().setFromObject(child);
+								box.getCenter(child.position);
+								child.geometry.center()
+							}
+						})
+						object.position.set(0, 0, 0)
+						gears = object;
+						scene.add(gears);
+					});
+				});
+			}
+			{//tablebase
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/tablebase/obj.mtl", function (materials) {
+					materials.preload();
+					materials.receiveShadow = true;
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load("model/obj/tablebase/tinker.obj", function (object) {
+						object.traverse(function (child) {
+							if (child instanceof THREE.Mesh) {
+								// child.material.transparent=true;
+								// child.material.opacity = 0.5;
+								child.receiveShadow = true;
+								child.castShadow = true;
+								// var box = new THREE.Box3().setFromObject( child );
+								// box.getCenter( child.position );
+								// child.geometry.center()
+							}
+						})
+						object.position.set(0, 0, 0)
+						scene.add(object);
+					});
+				});
+			}
+			{//ypillar
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/ypillar/obj.mtl", function (materials) {
+					materials.preload();
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load("model/obj/ypillar/tinker.obj", function (object) {
+						object.traverse(function (child) {
+							if (child instanceof THREE.Mesh) {
+								var box = new THREE.Box3().setFromObject(child);
+								box.getCenter(child.position);
+								child.geometry.center()
+								child.castShadow = true;
+								child.receiveShadow = true;
+							}
+						})
+						object.position.set(0, 0, 0)
+						scene.add(object);
+					});
+				});
+			}
+			{//xsliderbase and yslider
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/xsliderbase/obj.mtl", function (materials) {
+					materials.preload();
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load("model/obj/xsliderbase/tinker.obj", function (object) {
+						xsliderbase = object;
+						object.traverse(function (child) {
+							if (child instanceof THREE.Mesh) {
+								var box = new THREE.Box3().setFromObject(child);
+								box.getCenter(child.position);
+								child.geometry.center()
+								child.castShadow = true;
+								child.receiveShadow = true;
+							}
+						})
+						object.position.set(0, -4.5, 0)
+						scene.add(object);
+					});
+				});
+			}
+			{//ysliderbase
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/ysliderbase/obj.mtl", function (materials) {
+					materials.preload();
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load("model/obj/ysliderbase/tinker.obj", function (object) {
+						object.traverse(function (child) {
+							if (child instanceof THREE.Mesh) {
+								var box = new THREE.Box3().setFromObject(child);
+								box.getCenter(child.position);
+								child.geometry.center()
+								child.castShadow = true;
+								child.receiveShadow = true;
+							}
+						})
+						object.position.set(0, 0, 0)
+						scene.add(object);
+					});
+				});
+			}
+			{//stopperbase
+				let stopperbase1=null,stopperbase2=null,stopperbase3=null;
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/stopperbase/obj.mtl", function (materials) {
+					materials.preload();
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load("model/obj/stopperbase/tinker.obj", function (object) {
+						object.position.set(30.56, 112.85,94.06)
+						object.rotateY(Math.PI-Math.PI/4)
+						stopperbase1=object.clone()
+						stopperbase1.rotateY(Math.PI)
+						stopperbase1.position.set(-(63.53+94.06),112.85, -(94.06))
+						stopperbase2=object.clone()
+						stopperbase2.rotateY(Math.PI/2)
+						stopperbase2.position.set(30.56,112.85, -(94.06))
+						stopperbase3=object.clone()
+						stopperbase3.rotateY(-Math.PI/2)
+						stopperbase3.position.set(-(63.53+94.06),112.85, (94.06))
+						scene.add(stopperbase1)
+						scene.add(stopperbase2)
+						scene.add(stopperbase3)
+						scene.add(object);
+					});
+				});
+			}		
+			{//stopper
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/stopper/obj.mtl", function (materials) {
+					materials.preload();
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load("model/obj/stopper/tinker.obj", function (object) {
+						object.position.set(30.56, 112.85,94.06)
+						object.rotateY(Math.PI-Math.PI/4)
+						stopperMesh=object;
+						stopperMesh1=stopperMesh.clone()
+						stopperMesh1.rotateY(Math.PI)
+						stopperMesh1.position.set(-(63.53+94.06),112.85, -(94.06))
+						stopperMesh2=stopperMesh.clone()
+						stopperMesh2.rotateY(Math.PI/2)
+						stopperMesh2.position.set(30.56,112.85, -(94.06))
+						stopperMesh3=stopperMesh.clone()
+						stopperMesh3.rotateY(-Math.PI/2)
+						stopperMesh3.position.set(-(63.53+94.06),112.85, (94.06))
+						scene.add(stopperMesh);
+						scene.add(stopperMesh1);
+						scene.add(stopperMesh2);
+						scene.add(stopperMesh3)
+					});
+				});
+			}	
+			{//group of frame's parts
+				frameAll = new THREE.Group();
+
+				const lineGeometry = new THREE.BufferGeometry();
+				lineGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pdata.length * 2 * 3), 3));
+				lineGeometry.computeBoundingSphere();
+				lineMaterial = new THREE.LineBasicMaterial({
+					color: 0x000000,
+					transparent: true,
+					opacity: 0.6
+				});
+				//lineMaterial = new THREE.LineBasicMaterial({color: 0x000000});
+				lineSegments = new THREE.LineSegments(lineGeometry, lineMaterial);
+				lineSegments.rotation.z=-Math.PI / 120
+				frameAll.add(lineSegments);
+				frameAll.rotateX(-Math.PI / 2);
+				scene.add(frameAll)
+			}
+			
+			{//OrbitControl
+				controls = new OrbitControls(camera, renderer.domElement);
+				controls.enableDamping = true;
+				controls.dampingFactor = 0.05;
+				//controls.target = new THREE.Vector3(0, 40, 0);
+				controls.update();
+			}
+			{//gui
+				gui = new GUI();
+				gui.add(params, 'strokesNumber', 0, pdata.length).step(1).name('Strokes Number')
+				.listen();
+				gui.add(params, 'speedValue', 0, 2).step(0.05).name('speed');
+				gui.add(params, 'startArt').name('Start').onChange(function() {
+					stopper = !stopper;
+					stopperCount = 0;
+					//count=0;
+				});
+			}
+			//console.log(scene);
+
+		}
+		let tt =0
+		let r1=0
+		function step01() {
+			if(line) scene.remove(line);
+			let points = [];
+			let needleX = xslider.position.x-36.86;
+			let needleZ = xslider.position.z-3.93;
+			let needleY = xslider.position.y-24.72
+			if(k==0) r1=0;
+			else r1 = -(Math.PI * 2 / 240) * (rotateStep[k-1])//+frame.children[0].rotation.y
+
+			if(tt==k) {
+				needleXn = tcirclesize + tcirclesize * Math.cos(r1+frame.children[0].rotation.y-(Math.PI/120)) - tcirclesize;
+				needleZn = tcirclesize + tcirclesize * Math.sin(r1+frame.children[0].rotation.y-(Math.PI/120)) - tcirclesize;
+			} else if(tt == k+1){
+				needleXn = tcirclesize + tcirclesize * Math.cos(r1-(Math.PI/120)) - tcirclesize;
+				needleZn = tcirclesize + tcirclesize * Math.sin(r1-(Math.PI/120)) - tcirclesize;
+			}
+			tt=k
+			const material = new THREE.LineBasicMaterial( { color: 0xff0000 } );
+			points.push( new THREE.Vector3( needleX, needleY, needleZ ) );
+			points.push( new THREE.Vector3( needleXn-63.54, 110 , -needleZn) );
+			let strokegap = 1.2;
+			const geometry = new THREE.BufferGeometry().setFromPoints( points );
+			line = new THREE.Line( geometry, material );
+			scene.add( line );
+			renderer.render( scene, camera );	
+		}
+		function updateStrokes() {
+			var strokesCount = params.strokesNumber;
+			k=strokesCount;
+			let lineNum = 0;
+			const posS = new THREE.Vector3();
+			const posE = new THREE.Vector3();
+			let strokegap = 1.2;
+			if(k > 0) {
+				for (let i = 0; i < strokesCount ; i++) {
+					if (i % 200 == 0) strokegap += 0.2;
+					posS.set(array02[pdata[i]][0], -array02[pdata[i]][1], 108 + strokegap);
+					posE.set(array02[pdata[i + 1]][0], -array02[pdata[i + 1]][1], 108 + strokegap);
+					lineSegments.geometry.attributes.position.setXYZ(lineNum++, posS.x, posS.y, posS.z);
+					lineSegments.geometry.attributes.position.setXYZ(lineNum++, posE.x, posE.y, posE.z);
+				}
+			}
+			lineSegments.geometry.setDrawRange(0, lineNum);
+			lineSegments.position.set(-63.54, 0, 0);
+			lineSegments.geometry.attributes.position.needsUpdate = true;
+			
+		}
+		var count = 0;
+		var moveang1 = 0;
+		var moveang2 = 0;
+        var movingTime1 =0;
+		var testang1 = 0;
+		document.addEventListener("keydown", onDocumentKeyDown, false);
+		function onDocumentKeyDown(event) {
+			var keyCode = event.which;
+			//console.log(keyCode)
+			if (keyCode == 81) {
+				goon = true;
+			}
+		}
+		let stopperCount=0;
+		function animate() {
+			requestAnimationFrame(animate);
+			const delta = clock.getDelta();
+			updateStrokes();
+			moveBall();
+			updatePhysics(delta);
+			let sawTime = 0.02;
+			 if(stopperMesh && stopperCount == 0 && k==0) {
+			 	stopperCount++;
+				console.log(stopperCount,stopper)
+				if(stopper) {
+				// 	//stopperMesh.rotateZ(delta);
+					gsap.to(stopperMesh.rotation, { duration: 0.5, z: -Math.PI+1, repeat: 0, ease: "power3.inOut" })
+					gsap.to(stopperMesh1.rotation, { duration: 0.3, z: 1, repeat: 0, ease: "power3.inOut" })
+					gsap.to(stopperMesh2.rotation, { duration: 0.3, z: Math.PI+1, repeat: 0, ease: "power3.inOut" })
+					gsap.to(stopperMesh3.rotation, { duration: 0.3, z: 1, repeat: 0, ease: "power3.inOut" })
+				} else if(!stopper){
+				 	gsap.to(stopperMesh.rotation, { duration: 0.5, z: -Math.PI, repeat: 0, ease: "power3.inOut" })
+				 	gsap.to(stopperMesh1.rotation, { duration: 0.1, z: 0, repeat: 0, ease: "power3.inOut" })
+				 	gsap.to(stopperMesh2.rotation, { duration: 0.1, z: Math.PI, repeat: 0, ease: "power3.inOut" })
+				 	gsap.to(stopperMesh3.rotation, { duration: 0.1, z: 0, repeat: 0, ease: "power3.inOut" })
+				}
+			}
+			if (params.startArt) {
+				if (k>=0 && k<pdata.length && movingTime1 == 0) {
+					movingTime1 = movingTime[k]*5+params.speedValue;
+					deltaold = 0;
+					testang = rotateStep[k]
+				}
+				if (deltaold < movingTime1) {
+					//console.log('iplus:',idxplus[k])
+					//testang += idxplus[k]
+					if(idxplus[k] == 1 )
+					rotatingObjects(testang+idxplus[k],movingTime1,idxplus[k]);
+					else if(idxplus[k] == -1)
+					rotatingObjects(testang,movingTime1,idxplus[k]);
+					if(idxplus[k] == 2)
+					rotatingObjects(testang+1,movingTime1,idxplus[k]);
+					if(idxplus[k] == -3)
+					rotatingObjects(testang,movingTime1,idxplus[k]);
+				}
+				if (deltaold > movingTime1+sawTime && deltaold < movingTime1 + sawTime+0.35*(params.speedValue+1)) {
+					sawing(deltaold, movingTime1, sawTime)
+				}
+				if (deltaold > movingTime1 + sawTime+0.35*(params.speedValue+1)) {
+					movingTime1 = 0;
+					count = 0;
+					aa=0;
+					bb=0;
+					goon=false
+				}
+			} else {
+				if(params.strokesNumber == 0) {
+					//console.log(testang,rotateStep[k],frame.rotateY)
+					//stopper = false;
+					//rotatingObjects(testang+idxplus[k],movingTime1,idxplus[k]);
+					//count = 0; 
+					//rotatingObjects(0.1,0.1,0)
+				} else {
+					//stopper = true;
+				}
+			}
+			if(k >= pdata.length) {
+
+			}
+			//console.log(params.strokesNumber,stopperCount)
+			deltaold = deltaold + delta;
+			controls.update();
+			render();
+			
+		}
+		function render() {
+			if(xsliderbase) xsliderbase.position.y = xslider.position.y - 141
+			if(frame) step01();
+			renderer.render(scene, camera);
+			stats.update()
+		}
+		function createJointObjects() {
+
+			let pos2 = { x: 173.44, y: 131.75, z: 0.78 };//arm00 position
+			let pos3 = { x: 152.15, y: 154.46, z: -1.43 };//arm01 position
+			let pos4 = { x: 75.35, y: 140.84, z: 5.21 };//xslider position
+			let pos5 = { x: 105.30, y: 177.04 - 4.5, z: 24.04 };//xslider base & yslider position
+			let pos6 = { x: 101.38, y: 154.78, z: 24.22 };//yslider base position
+			let pos7 = { x: 83.3, y: 288.31, z: 14.53 };//yslider arm00 position
+			let pos8 = { x: 101.34, y: 255.77, z: 13.93 };//yslider arm01 position
+			let pos9 = { x: 87.55, y: 286.05, z: 35.99 };//yslider arm01 position
+			let scale2 = { x: 17.13, y: 56.55, z: 11.82 };
+			let scale3 = { x: 46.85, y: 10.69, z: 2 };
+			let scale4 = { x: 147.72, y: 49.45, z: 20.86 };
+			let scale5 = { x: 150.79, y: 147.72, z: 34.57 };
+			let scale6 = { x: 34.16, y: 131.37, z: 9.4 };
+			let scale7 = { x: 45.53, y: 17.22, z: 14.14 };
+			let scale8 = { x: 8, y: 72.49, z: 2 };
+			let scale9 = { x: 31.9, y: 18.53, z: 28.38 };
+			let quat = { x: 0, y: 0, z: 0, w: 1 };
+			let mass9 = 0;
+			let mass2 = 0.01;
+			let mass3 = 0.01;
+			let mass4 = 1;
+			let mass5 = 0;
+			let mass6 = 0;
+			let mass7 = 1;
+			let transform, motionState, sphereColShape, localInertia, rbInfo;
+			let yservoBody, armBody, armBody1, yarmBody, yarmBody1, xsliderBody, xsliderbaseBody,
+				xsliderbaseGhostBody, ysliderbaseBody, ysliderbaseGhostBody;
+			var yservo, arm01, arm02, yarm01, yarm02, xsliderbase, xsliderbaseghost, ysliderbase, ysliderbaseghost;
+			let sframeInA = new Ammo.btTransform();
+			sframeInA.setIdentity();
+			let sframeInB = new Ammo.btTransform();
+			sframeInB.setIdentity();
+			let sframeInC = new Ammo.btTransform();
+			sframeInC.setIdentity();
+			let sframeInD = new Ammo.btTransform();
+			sframeInD.setIdentity();
+			let sframeInC1 = new Ammo.btTransform();
+			sframeInC1.setIdentity();
+			let sframeInD1 = new Ammo.btTransform();
+			sframeInD1.setIdentity();
+			{//xservor arm01 Graphics: boundSphere  28.19
+				arm01 = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }));
+				arm01.position.set(pos2.x, pos2.y, pos2.z);
+				arm01.scale.set(scale2.x, scale2.y, scale2.z);
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/xservoarm/obj.mtl", function (materials) {
+					materials.preload();
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load('model/obj/xservoarm/tinker.obj', function (object) {
+						object.scale.set(1 / scale2.x, 1 / scale2.y, 1 / scale2.z)
+						object.children[0].castShadow = true;
+						object.name = "xservoarm"
+						arm01.add(object);
+					});
+				})
+				scene.add(arm01);
+			}
+			{//xservo arm01 Physics
+				let transform = new Ammo.btTransform();
+				transform.setIdentity();
+				transform.setOrigin(new Ammo.btVector3(pos2.x, pos2.y, pos2.z));
+				transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+				motionState = new Ammo.btDefaultMotionState(transform);
+
+				let armShape = new Ammo.btBoxShape(new Ammo.btVector3(scale2.x * 0.5, scale2.y * 0.5, scale2.z * 0.5));
+				armShape.setMargin(0.05);
+
+				localInertia = new Ammo.btVector3(0, 0, 0);
+				armShape.calculateLocalInertia(mass2, localInertia);
+
+				rbInfo = new Ammo.btRigidBodyConstructionInfo(mass2, motionState, armShape, localInertia);
+				armBody = new Ammo.btRigidBody(rbInfo);
+				armBody.setFriction(0);
+				armBody.setRollingFriction(0);
+				armBody.setActivationState(STATE.DISABLE_DEACTIVATION)
+				physicsWorld.addRigidBody(armBody);
+
+				arm01.userData.physicsBody = armBody;
+
+				rigidBodies.push(arm01);
+			}
+
+			{//xservo arm02 Graphics
+				arm02 = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }));
+				arm02.position.set(pos3.x, pos3.y, pos3.z);
+				arm02.scale.set(scale3.x, scale3.y, scale3.z * 4);
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/xservoarm/obj.mtl", function (materials) {
+					materials.preload();
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load('model/obj/xservoarm1/tinker.obj', function (object) {
+						object.scale.set(1 / scale3.x, 1 / scale3.y, 1 / scale3.z / 4)
+						object.children[0].castShadow = true;
+						arm02.add(object);
+					});
+				})
+				scene.add(arm02);
+			}
+			{//xservo arm02 Physics
+				let transform = new Ammo.btTransform();
+				transform.setIdentity();
+				transform.setOrigin(new Ammo.btVector3(pos3.x, pos3.y, pos3.z));
+				transform.setRotation(new Ammo.btQuaternion(0, 0, 0, quat.w));
+				motionState = new Ammo.btDefaultMotionState(transform);
+
+				let armShape = new Ammo.btBoxShape(new Ammo.btVector3(scale3.x * 0.5, scale3.y * 0.5, scale3.z * 0.5));
+				armShape.setMargin(0.05);
+
+				localInertia = new Ammo.btVector3(0, 0, 0);
+				armShape.calculateLocalInertia(mass3, localInertia);
+
+				rbInfo = new Ammo.btRigidBodyConstructionInfo(mass3, motionState, armShape, localInertia);
+				armBody1 = new Ammo.btRigidBody(rbInfo);
+				armBody1.setFriction(0);
+				armBody1.setRollingFriction(0);
+				armBody1.setActivationState(STATE.DISABLE_DEACTIVATION)
+				physicsWorld.addRigidBody(armBody1);
+
+				arm02.userData.physicsBody = armBody1;
+
+				rigidBodies.push(arm02);
+			}
+			{//yservor arm01 Graphics
+				yarm01 = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }));
+				yarm01.position.set(pos7.x, pos7.y, pos7.z);
+				yarm01.scale.set(scale7.x, scale7.y, scale7.z * 4);
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/yservoarm/obj.mtl", function (materials) {
+					materials.preload();
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load('model/obj/yservoarm/tinker.obj', function (object) {
+						object.scale.set(1 / scale7.x, 1 / scale7.y, 1 / scale7.z / 4)
+						object.children[0].castShadow = true;
+						object.name = "yservoarm"
+						yarm01.add(object);
+					});
+				})
+				scene.add(yarm01);
+			}
+			{//yservo arm01 Physics
+				let transform = new Ammo.btTransform();
+				transform.setIdentity();
+				transform.setOrigin(new Ammo.btVector3(pos7.x, pos7.y, pos7.z));
+				transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+				motionState = new Ammo.btDefaultMotionState(transform);
+
+				let armShape = new Ammo.btBoxShape(new Ammo.btVector3(scale7.x * 0.5, scale7.y * 0.5, scale7.z * 0.5));
+				armShape.setMargin(0.05);
+
+				localInertia = new Ammo.btVector3(0, 0, 0);
+				armShape.calculateLocalInertia(mass7, localInertia);
+
+				rbInfo = new Ammo.btRigidBodyConstructionInfo(mass7, motionState, armShape, localInertia);
+				yarmBody = new Ammo.btRigidBody(rbInfo);
+				yarmBody.setFriction(0);
+				yarmBody.setRollingFriction(0);
+				yarmBody.setActivationState(STATE.DISABLE_DEACTIVATION)
+				physicsWorld.addRigidBody(yarmBody);
+
+				yarm01.userData.physicsBody = yarmBody;
+
+				rigidBodies.push(yarm01);
+			}
+			{//yservor arm02 Graphics
+				yarm02 = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }));
+				yarm02.position.set(pos8.x, pos8.y, pos8.z);
+				yarm02.scale.set(scale8.x, scale8.y, scale8.z);
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/yservoarm1/obj.mtl", function (materials) {
+					materials.preload();
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load('model/obj/yservoarm1/tinker.obj', function (object) {
+						object.scale.set(1 / scale8.x, 1 / scale8.y, 1 / scale8.z)
+						object.children[0].castShadow = true;
+						object.name = "yservoarm1"
+						yarm02.add(object);
+					});
+				})
+				scene.add(yarm02);
+			}
+			{//yservo arm02 Physics
+				let transform = new Ammo.btTransform();
+				transform.setIdentity();
+				transform.setOrigin(new Ammo.btVector3(pos8.x, pos8.y, pos8.z));
+				transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+				motionState = new Ammo.btDefaultMotionState(transform);
+
+				let armShape = new Ammo.btBoxShape(new Ammo.btVector3(scale8.x * 0.5, scale8.y * 0.5, scale8.z * 0.5));
+				armShape.setMargin(0.05);
+
+				localInertia = new Ammo.btVector3(0, 0, 0);
+				armShape.calculateLocalInertia(mass7, localInertia);
+
+				rbInfo = new Ammo.btRigidBodyConstructionInfo(mass7, motionState, armShape, localInertia);
+				yarmBody1 = new Ammo.btRigidBody(rbInfo);
+				yarmBody1.setFriction(0);
+				yarmBody1.setRollingFriction(0);
+				yarmBody1.setActivationState(STATE.DISABLE_DEACTIVATION)
+				physicsWorld.addRigidBody(yarmBody1);
+
+				yarm02.userData.physicsBody = yarmBody1;
+
+				rigidBodies.push(yarm02);
+			}
+			{//yservo Graphics
+				yservo = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }));
+				yservo.position.set(pos9.x, pos9.y, pos9.z);
+				yservo.scale.set(scale9.x, scale9.y, scale9.z);
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/yservo/obj.mtl", function (materials) {
+					materials.preload();
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load('model/obj/yservo/tinker.obj', function (object) {
+						object.scale.set(1 / scale9.x, 1 / scale9.y, 1 / scale9.z)
+						object.children[0].castShadow = true;
+						yservo.add(object);
+					});
+				})
+				scene.add(yservo);
+			}
+			{//yservo Physics
+				let transform = new Ammo.btTransform();
+				transform.setIdentity();
+				transform.setOrigin(new Ammo.btVector3(pos9.x, pos9.y, pos9.z));
+				transform.setRotation(new Ammo.btQuaternion(0, 0, 0, quat.w));
+				motionState = new Ammo.btDefaultMotionState(transform);
+
+				let armShape = new Ammo.btBoxShape(new Ammo.btVector3(scale9.x * 0.5, scale9.y * 0.5, scale9.z * 0.5));
+				armShape.setMargin(0.05);
+
+				localInertia = new Ammo.btVector3(0, 0, 0);
+				armShape.calculateLocalInertia(mass9, localInertia);
+
+				rbInfo = new Ammo.btRigidBodyConstructionInfo(mass9, motionState, armShape, localInertia);
+				yservoBody = new Ammo.btRigidBody(rbInfo);
+				yservoBody.setFriction(0);
+				yservoBody.setRollingFriction(0);
+				yservoBody.setActivationState(STATE.DISABLE_DEACTIVATION)
+				physicsWorld.addRigidBody(yservoBody);
+
+				yservo.userData.physicsBody = yservoBody;
+
+				rigidBodies.push(yservo);
+			}
+			{//xslider Graphics
+				xslider = xsliderPhysicsMesh = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial({ visible: false }));
+				xslider.position.set(pos4.x, pos4.y, pos4.z);
+				xslider.scale.set(scale4.x, scale4.y, scale4.z);
+				var mtlLoader = new MTLLoader();
+				mtlLoader.load("model/obj/xslider/obj.mtl", function (materials) {
+					materials.preload();
+					let materials1 = new THREE.MeshStandardMaterial( {
+						color: 0xc0c0c0,
+						roughness: 0.5,
+						metalness: 0.5,
+					} );
+					let mesh;
+					var objLoader = new OBJLoader();
+					objLoader.setMaterials(materials);
+					objLoader.load('model/obj/xslider/tinker.obj', function (object) {
+						object.scale.set(1 / scale4.x, 1 / scale4.y, 1 / scale4.z)
+						object.name = "xslider"
+						object.traverse(function (child) {
+							child.castShadow = true;
+							//child.scale.set(1 / scale4.x, 1 / scale4.y, 1 / scale4.z)
+							const geometry = child.geometry
+							console.log(child.name)
+							if(child.name == 'group_0_16448250') {
+								mesh = new THREE.Mesh(geometry,materials1)
+								mesh.scale.set(1 / scale4.x, 1 / scale4.y, 1 / scale4.z)
+								xslider.add(mesh);
+							}
+						})
+						xslider.add(object)
+					});
+				})
+				scene.add(xslider);
+			}
+			{//xslider Physics
+				let frameInA = new Ammo.btTransform();
+				frameInA.setIdentity();
+				frameInA.setOrigin(new Ammo.btVector3(pos4.x, pos4.y, pos4.z));
+				frameInA.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+				motionState = new Ammo.btDefaultMotionState(frameInA);
+
+				let xsliderShape = new Ammo.btBoxShape(new Ammo.btVector3(scale4.x * 0.1, scale4.y * 0.1, scale4.z * 0.1));
+				xsliderShape.setMargin(0.05);
+
+				localInertia = new Ammo.btVector3(0, 0, 0);
+				xsliderShape.calculateLocalInertia(mass4, localInertia);
+
+				rbInfo = new Ammo.btRigidBodyConstructionInfo(mass4, motionState, xsliderShape, localInertia);
+				xsliderBody = new Ammo.btRigidBody(rbInfo);
+				xsliderBody.setFriction(0);
+				xsliderBody.setRollingFriction(0);
+				xsliderBody.setActivationState(4)
+				physicsWorld.addRigidBody(xsliderBody);
+
+				xslider.userData.physicsBody = xsliderBody;
+				rigidBodies.push(xslider);
+
+
+			}
+			{//xsliderbase Graphics
+				xsliderbase = xsliderbasePhysicsMesh = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial({ visible: false }));
+				xsliderbase.position.set(pos5.x, pos5.y, pos5.z);
+				xsliderbase.scale.set(scale5.x, scale5.y, scale5.z);
+			}
+			{//xsliderbase Physics
+				let frameInB = new Ammo.btTransform();
+				frameInB.setIdentity();
+				frameInB.setOrigin(new Ammo.btVector3(pos5.x, pos5.y, pos5.z - 100));
+				frameInB.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+				motionState = new Ammo.btDefaultMotionState(frameInB);
+
+				let xsliderbaseShape = new Ammo.btBoxShape(new Ammo.btVector3(scale5.x * 0.1, scale5.y * 0.1, scale5.z * 0.1));
+				xsliderbaseShape.setMargin(0.05);
+
+				localInertia = new Ammo.btVector3(0, 0, 0);
+				xsliderbaseShape.calculateLocalInertia(mass5, localInertia);
+
+				rbInfo = new Ammo.btRigidBodyConstructionInfo(mass5, motionState, xsliderbaseShape, localInertia);
+				xsliderbaseBody = new Ammo.btRigidBody(rbInfo);
+				xsliderbaseBody.setFriction(10);
+				xsliderbaseBody.setRollingFriction(10);
+				xsliderbaseBody.setActivationState(STATE.DISABLE_DEACTIVATION)
+				physicsWorld.addRigidBody(xsliderbaseBody);
+
+				xsliderbase.userData.physicsBody = xsliderbaseBody;
+				rigidBodies.push(xsliderbase);
+			}
+			{//ysliderbase Graphics
+				ysliderbase = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial({ visible: false }));
+				ysliderbase.position.set(pos6.x, pos6.y, pos6.z);
+				ysliderbase.scale.set(scale6.x, scale6.y, scale6.z);
+			}
+			{//ysliderbase Physics
+				let frameInC = new Ammo.btTransform();
+				frameInC.setIdentity();
+				frameInC.setOrigin(new Ammo.btVector3(pos6.x, pos6.y, pos6.z - 100));
+				frameInC.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+				motionState = new Ammo.btDefaultMotionState(frameInC);
+
+				let ysliderbaseShape = new Ammo.btBoxShape(new Ammo.btVector3(scale6.x * 0.1, scale6.y * 0.1, scale6.z * 0.1));
+				ysliderbaseShape.setMargin(0.05);
+
+				localInertia = new Ammo.btVector3(0, 0, 0);
+				ysliderbaseShape.calculateLocalInertia(mass6, localInertia);
+
+				rbInfo = new Ammo.btRigidBodyConstructionInfo(mass6, motionState, ysliderbaseShape, localInertia);
+				ysliderbaseBody = new Ammo.btRigidBody(rbInfo);
+				ysliderbaseBody.setFriction(10);
+				ysliderbaseBody.setRollingFriction(10);
+				ysliderbaseBody.setActivationState(STATE.DISABLE_DEACTIVATION)
+				physicsWorld.addRigidBody(ysliderbaseBody);
+
+				ysliderbase.userData.physicsBody = ysliderbaseBody;
+				rigidBodies.push(ysliderbase);
+			}
+
+			sframeInA.setOrigin(new Ammo.btVector3(15.74, 36.2, 12.84 + 20));
+			sframeInB.setOrigin(new Ammo.btVector3(-14.21, 0, -5.99 + 20 + 100));
+			sframeInC.setOrigin(new Ammo.btVector3(-3.92 * 2, -7.04, 100));
+			sframeInC.getBasis().setEulerZYX(0, 0, -Math.PI / 2);
+			sframeInD.setOrigin(new Ammo.btVector3(-3.92, 15.22, 100.18));
+			sframeInD.getBasis().setEulerZYX(0, 0, -Math.PI / 2);
+			sframeInC1.setOrigin(new Ammo.btVector3(3.96, -48.17, -10.11));
+			sframeInC1.getBasis().setEulerZYX(0, Math.PI / 2, 0);
+			sframeInD1.setOrigin(new Ammo.btVector3(0, 30.56, 0));
+			sframeInD1.getBasis().setEulerZYX(0, Math.PI / 2, 0);
+			let servomBodyPivot = new Ammo.btVector3(68.40, -55.11, -17.28 + 100);
+			let BodyAng = new Ammo.btVector3(0, 0, 1);
+			let BodyAng1 = new Ammo.btVector3(0, 0, 1);
+			let BodyAng2 = new Ammo.btVector3(0, 0, -1);
+			let armBody_00_Pivot = new Ammo.btVector3(0.26, -9.82, 5.93);
+			let armBody_00_PivotNext = new Ammo.btVector3(-2.57, 23.99, -1.06);
+			let armBody_01_Pivot = new Ammo.btVector3(18.72, 1.28, 1);
+			let armBody_01_PivotNext = new Ammo.btVector3(-18.33, -1.26, 1);
+			let xsliderPivot = new Ammo.btVector3(58.48, 12.36, -5.45);
+
+			let yservoPivot = new Ammo.btVector3(-5.34, 2.24, -14.19);
+			let yarmBody_00_Pivot = new Ammo.btVector3(-1.08, 0.02, 7.17);
+			let yarmBody_00_PivotNext = new Ammo.btVector3(18.02, 0.39, 0.51);
+			let yarmBody_01_Pivot = new Ammo.btVector3(-0.02, 32.16, 1);
+			let yarmBody_01_PivotNext = new Ammo.btVector3(72.1, -143.14, -7.2);
+			p2p = new Ammo.btHingeConstraint(xsliderbaseBody, armBody, servomBodyPivot, armBody_00_Pivot, BodyAng, BodyAng);
+			let p2p1 = new Ammo.btHingeConstraint(armBody, armBody1, armBody_00_PivotNext, armBody_01_Pivot, BodyAng, BodyAng);
+			p2p2 = new Ammo.btSliderConstraint(xsliderbaseBody, xsliderBody, sframeInB, sframeInA, true)
+			p2p22 = new Ammo.btSliderConstraint(xsliderbaseBody, ysliderbaseBody, sframeInC, sframeInD, true)
+			let p2p3 = new Ammo.btHingeConstraint(xsliderBody, armBody1, xsliderPivot, armBody_01_PivotNext, BodyAng, BodyAng);
+
+			let yp2p = new Ammo.btHingeConstraint(yservoBody, yarmBody, yservoPivot, yarmBody_00_Pivot, BodyAng, BodyAng);
+			let yp2p1 = new Ammo.btHingeConstraint(yarmBody, yarmBody1, yarmBody_00_PivotNext, yarmBody_01_Pivot, BodyAng, BodyAng);
+			let yp2p2 = new Ammo.btSliderConstraint(yarmBody1, xsliderbaseBody, sframeInC1, sframeInD1, true);//yarmBody_01_PivotNext,armBody_00_Pivot, BodyAng2,BodyAng2);
+			let physicsBody = xsliderPhysicsMesh.userData.physicsBody;
+			let resultantImpulse = new Ammo.btVector3(-5, 0, 0)
+			resultantImpulse.op_mul(7);
+			physicsBody.setLinearVelocity(resultantImpulse);
+			p2p2.setLowerLinLimit(-8)
+			p2p2.setUpperLinLimit(-8)
+			physicsWorld.addConstraint(p2p, true);
+			physicsWorld.addConstraint(p2p1, true);
+			physicsWorld.addConstraint(p2p3, true);
+			physicsWorld.addConstraint(p2p2, true);
+			physicsWorld.addConstraint(p2p22, true);
+			physicsWorld.addConstraint(yp2p, true);
+			physicsWorld.addConstraint(yp2p1, true);
+			physicsWorld.addConstraint(yp2p2, true);
+		}
+		function updatePhysics(deltaTime) {
+
+			// Step world
+			physicsWorld.stepSimulation(deltaTime, 10);
+
+			// Update rigid bodies
+			for (let i = 0; i < rigidBodies.length; i++) {
+				let objThree = rigidBodies[i];
+				let objAmmo = objThree.userData.physicsBody;
+				let ms = objAmmo.getMotionState();
+				if (ms) {
+
+					ms.getWorldTransform(tmpTrans);
+					let p = tmpTrans.getOrigin();
+					let q = tmpTrans.getRotation();
+					objThree.position.set(p.x(), p.y(), p.z());
+					objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
+
+				}
+			}
+
+		}
+		function rotatingObjects(degree,movingTime,indexPlus) {
+			if (gears && count == 0) {
+				testang += indexPlus
+				count++;
+				moveang1 = (Math.PI * 6 / 240) * (degree)
+				moveang2 = (Math.PI * 2 / 240) * (degree)
+				gsap.to(gears.children[0].rotation, { duration: movingTime, y: -moveang1, repeat: 0, ease: "power3.inOut" })
+				gsap.to(disk.children[0].rotation, { duration: movingTime, y: moveang2, repeat: 0, ease: "power3.inOut" })
+				gsap.to(frame.children[0].rotation, { duration: movingTime, y: moveang2, repeat: 0, ease: "power3.inOut" })
+				gsap.to(frame.children[1].rotation, { duration: movingTime, y: moveang2, repeat: 0, ease: "power3.inOut" })
+				gsap.to(frame.children[2].rotation, { duration: movingTime, y: moveang2, repeat: 0, ease: "power3.inOut" })
+				gsap.to(gears.children[1].rotation, { duration: movingTime, y: moveang2, repeat: 0, ease: "power3.inOut" })
+				gsap.to(lineSegments.rotation, { duration: movingTime, z: moveang2, repeat: 0, ease: "power3.inOut" })
+
+				gsap.to(stickerGroup.rotation, { duration: movingTime, y: moveang2, repeat: 0, ease: "power3.inOut" })
+			}
+		}
+		let aa = 0;
+		let bb = 0;
+		function sawing(deltaold, movingTime, sawTime) {
+			let physicsBody = xsliderPhysicsMesh.userData.physicsBody;
+			let physicsBody2 = xsliderbasePhysicsMesh.userData.physicsBody;
+			let resultantImpulse = new Ammo.btVector3(-5, 0, 0)
+			let resultantImpulse2 = new Ammo.btVector3(0, -5, 0)
+		
+				if (deltaold > movingTime + sawTime && deltaold < movingTime +sawTime+0.1*(params.speedValue+1)) {//밖으로
+					p2p2.setLowerLinLimit(-8)
+					p2p2.setUpperLinLimit(0)
+					resultantImpulse.op_mul(-14/(params.speedValue+1));
+					physicsBody.setLinearVelocity(resultantImpulse);
+
+				}
+				if(deltaold > movingTime + sawTime+0.05*(params.speedValue+1) && deltaold < movingTime +sawTime+0.1*(params.speedValue+1)) {
+					if(aa==0) {
+						aa++;
+						k=k+1;
+						params.strokesNumber=k;
+						
+					}
+				}
+				if(deltaold > movingTime + sawTime+0.05*(params.speedValue+1) && deltaold < movingTime +sawTime+0.1*(params.speedValue+1)) {
+					if(bb==0) {
+						bb++;
+						//console.log('jww',idxplus[k-1])//위 조건문에서 k+1이 됨 그래서 -1해줌
+						count=0;
+						//testang = testang-idxplus[k-1]
+						if(idxplus[k-1] == 1) rotatingObjects( testang-idxplus[k-1],0.2)
+						if(idxplus[k-1] == -1 ) rotatingObjects( testang-2*idxplus[k-1],0.2)
+						if(idxplus[k-1] == 2) rotatingObjects( testang-idxplus[k-1],0.2)
+						if(idxplus[k-1] == -3) rotatingObjects( testang+4,0.2)
+						
+					}
+				}
+				if (deltaold > movingTime + sawTime+0.1*(params.speedValue+1) && deltaold < movingTime + sawTime+0.2*(params.speedValue+1)) {//내리기
+					resultantImpulse2.op_mul(14/(params.speedValue+1));
+					physicsBody2.setLinearVelocity(resultantImpulse2);
+					p2p22.setLowerLinLimit(-36)
+					p2p22.setUpperLinLimit(-22)
+				}
+				if (deltaold > movingTime + sawTime+0.2*(params.speedValue+1) && deltaold < movingTime + sawTime+0.3*(params.speedValue+1)) {//안으로
+					p2p2.setLowerLinLimit(-8)
+					p2p2.setUpperLinLimit(-8)
+					resultantImpulse.op_mul(14/(params.speedValue+1));
+					physicsBody.setLinearVelocity(resultantImpulse);
+				}
+				if (deltaold > movingTime + sawTime+0.25*(params.speedValue+1) && deltaold < movingTime + sawTime+0.35*(params.speedValue+1)) {//올리기
+					p2p22.setLowerLinLimit(-36)
+					p2p22.setUpperLinLimit(-36)
+					resultantImpulse2.op_mul(-14/(params.speedValue+1));
+					physicsBody2.setLinearVelocity(resultantImpulse2);
+				}
+		}
+		function arr_check(arr, start, val) {
+			for (var i = start; i < cdiv; i++) {
+				if (arr[i] == val) return 1;
+			}
+			return -1;
+		}
+		function cRotate(spr) {
+			var movetime = 0;
+			if (spr / 40 >= 5 && spr / 40 < 40) {
+				for (var j = 150; j > 50; j = j - 1) {
+					movetime = movetime + j;
+				}
+				for (var k = 0; k < spr - 200; k++) {
+					movetime = movetime + 50;
+				}
+				for (var l = 50; l < 150; l = l + 1) {
+					movetime = movetime + l;
+				}
+			} else if (spr / 40 >= 40) {
+				for (var j = 250; j > 50; j = j - 1) {
+					movetime = movetime + 30;
+				}
+				for (var k = 0; k < spr - 400; k++) {
+					movetime = movetime + 30;
+				}
+				for (var l = 50; l < 250; l = l + 1) {
+					movetime = movetime + 30;
+				}
+			} else {
+				for (var i = 0; i < spr; i++) {
+					movetime = movetime + 200;
+				}
+			}
+			return movetime;
+		}
+		function shiftLeft(arr, d, n) {
+			reverse(arr, 0, d);
+			reverse(arr, d, n);
+			reverse(arr, 0, n);
+		}
+		function reverse(arr, start, end) {
+			let temp;
+			end = end - 1;
+			while (start < end) {
+				temp = arr[start];
+				arr[start] = arr[end];
+				arr[end] = temp;
+				start++;
+				end--;
+			}
+		}
+		function index_arr(arr, size, val) {
+			for (var i = 0; i < size; i++) {
+				if (arr[i] == val) return i;
+			}
+			return -1;
+		}
+		function moveBall() {
+
+			let scalingFactor = 100;
+
+			let moveX = moveDirection.right - moveDirection.left;
+			let moveZ = 0//moveDirection.back - moveDirection.forward;
+			let moveY = moveDirection.back - moveDirection.forward;
+
+			if (moveX == 0 && moveY == 0 && moveZ == 0) return;
+
+			let resultantImpulse = new Ammo.btVector3(0, moveY, 0)
+			resultantImpulse.op_mul(scalingFactor);
+			let resultantImpulse1 = new Ammo.btVector3(moveX, 0, 0)
+			resultantImpulse1.op_mul(scalingFactor);
+			//console.log(p2p.getLowerLinLimit());
+			physicsBody.setLinearVelocity(resultantImpulse);
+			let physicsBody1 = xsliderPhysicsMesh.userData.physicsBody;
+			//console.log(p2p.getLowerLinLimit());
+			physicsBody1.setLinearVelocity(resultantImpulse1);
+
+		}
+		function setupEventHandlers() {
+			window.addEventListener('keydown', handleKeyDown, false);
+			window.addEventListener('keyup', handleKeyUp, false);
+		}
+		function handleKeyDown(event) {
+
+			let keyCode = event.keyCode;
+
+			switch (keyCode) {
+
+				case 87: //W: FORWARD
+					moveDirection.forward = 1
+					break;
+
+				case 83: //S: BACK
+					moveDirection.back = 1
+					break;
+
+				case 65: //A: LEFT
+					moveDirection.left = 1
+					break;
+
+				case 68: //D: RIGHT
+					moveDirection.right = 1
+					break;
+
+			}
+		}
+		function handleKeyUp(event) {
+			let keyCode = event.keyCode;
+
+			switch (keyCode) {
+				case 87: //FORWARD
+					moveDirection.forward = 0
+					break;
+
+				case 83: //BACK
+					moveDirection.back = 0
+					break;
+
+				case 65: //LEFT
+					moveDirection.left = 0
+					break;
+
+				case 68: //RIGHT
+					moveDirection.right = 0
+					break;
+
+			}
+
+		} 
+	</script>
+</body>
+
+</html>

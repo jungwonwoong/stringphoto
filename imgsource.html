@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Image Input Options</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid #000;
+            margin-top: 10px;
+            touch-action: none; /* Prevent default touch actions */
+        }
+        .controls {
+            margin: 10px 0;
+        }
+        #eraserCursor {
+            position: absolute;
+            pointer-events: none;
+            border: 1px dashed black;
+            background-color: rgba(255, 192, 203, 0.5); /* Pink with 50% opacity */
+            border-radius: 50%;
+            width: 0;
+            height: 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Choose or Create an Image</h1>
+
+    <!-- 1. Select image from device -->
+    <h2>Select from Device</h2>
+    <input type="file" accept="image/*" id="fileInput">
+    <br>
+    <img id="selectedImage" alt="Selected Image" style="max-width: 100%; margin-top: 10px;">
+
+    <!-- 2. Take a photo -->
+    <h2>Take a Photo</h2>
+    <input type="file" accept="image/*" capture="environment" id="cameraInput">
+    <br>
+    <img id="capturedImage" alt="Captured Image" style="max-width: 100%; margin-top: 10px;">
+
+    <!-- 3. Draw an image -->
+    <h2>Draw an Image</h2>
+    <div class="controls">
+        <label for="lineWidth">Line Width:</label>
+        <input type="number" id="lineWidth" min="1" max="20" value="2">
+
+        <label for="lineColor">Line Color:</label>
+        <input type="color" id="lineColor" value="#000000">
+
+        <label for="brushMode">Brush Mode:</label>
+        <select id="brushMode">
+            <option value="draw">Draw</option>
+            <option value="erase">Erase</option>
+        </select>
+    </div>
+    <canvas id="drawingCanvas" width="300" height="300"></canvas>
+    <div id="eraserCursor"></div>
+    <br>
+    <button id="clearCanvas">Clear</button>
+    <button id="saveCanvas">Save</button>
+    <br>
+    <img id="drawnImage" alt="Drawn Image" style="max-width: 100%; margin-top: 10px;">
+
+    <script>
+        // 1. Handle file selection
+        const fileInput = document.getElementById('fileInput');
+        const selectedImage = document.getElementById('selectedImage');
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                selectedImage.src = URL.createObjectURL(file);
+            }
+        });
+
+        // 2. Handle camera input
+        const cameraInput = document.getElementById('cameraInput');
+        const capturedImage = document.getElementById('capturedImage');
+        cameraInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                capturedImage.src = URL.createObjectURL(file);
+            }
+        });
+
+        // 3. Drawing on canvas with touch support
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        const lineWidthInput = document.getElementById('lineWidth');
+        const lineColorInput = document.getElementById('lineColor');
+        const brushModeInput = document.getElementById('brushMode');
+        const eraserCursor = document.getElementById('eraserCursor');
+
+        ctx.lineCap = 'round'; // Make line ends round
+        ctx.lineJoin = 'round'; // Make line corners round
+
+        function updateEraserCursorPosition(touch, rect) {
+            const x = touch.clientX;
+            const y = touch.clientY;
+            eraserCursor.style.left = `${x}px`;
+            eraserCursor.style.top = `${y}px`;
+        }
+
+        canvas.addEventListener('touchstart', (event) => {
+            isDrawing = true;
+            ctx.lineWidth = lineWidthInput.value;
+            ctx.strokeStyle = brushModeInput.value === 'erase' ? '#FFFFFF' : lineColorInput.value;
+            ctx.globalCompositeOperation = brushModeInput.value === 'erase' ? 'destination-out' : 'source-over';
+            const rect = canvas.getBoundingClientRect();
+            const touch = event.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+
+            if (brushModeInput.value === 'erase') {
+                eraserCursor.style.width = `${ctx.lineWidth}px`;
+                eraserCursor.style.height = `${ctx.lineWidth}px`;
+                eraserCursor.style.display = 'block';
+                updateEraserCursorPosition(touch, rect);
+            }
+        });
+
+        canvas.addEventListener('touchmove', (event) => {
+            if (!isDrawing) return;
+            event.preventDefault(); // Prevent scrolling
+            const rect = canvas.getBoundingClientRect();
+            const touch = event.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            if (brushModeInput.value === 'erase') {
+                updateEraserCursorPosition(touch, rect);
+            }
+        });
+
+        canvas.addEventListener('touchend', () => {
+            isDrawing = false;
+            if (brushModeInput.value === 'erase') {
+                eraserCursor.style.display = 'none';
+            }
+        });
+
+        // Clear canvas
+        document.getElementById('clearCanvas').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        // Save canvas as an image
+        document.getElementById('saveCanvas').addEventListener('click', () => {
+            const drawnImage = document.getElementById('drawnImage');
+            drawnImage.src = canvas.toDataURL('image/png');
+        });
+    </script>
+</body>
+</html>

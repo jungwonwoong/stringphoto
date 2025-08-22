@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>STRING PHOTO SIMULATOR</title>
+    <script src="p5.min.js"></script>
+    <script src="send.js" defer></script>
+    <script src="kniter.js"></script>
+    <script src="editPicturePage.js"></script>
+    <script src="generatePage.js"></script>
+    <script src="sketch.js"></script>
+    <link href="style.css" rel="stylesheet" />
+    <meta name="keyword" content="stringart, stringphoto, craft">
+</head>
+<body>
+  <div id="toolBar">
+    <div id="menuCover"></div>
+    <div id="balanceCover"></div>
+  <div id="step01">
+    <div id="inputImage" style="cursor: pointer;" class="buttonSt01">
+      <label class="labelSt" style="cursor: pointer;" for="file">Open File</label> 
+      <input type="file" id="file" onchange="openFile(event)" />
+    </div>
+    <div id="numberOfPins" class="buttonSt">
+      <div class="labelSt">Pins Number</div>
+      <div id="pinSelect" class="displayBoxParent">
+        <div id="frameList" class="displayBox">
+          <div translate="no" class="selected">120</div>
+          <div translate="no">240</div>
+          <div translate="no">280</div>
+          <div translate="no">320</div>
+        </div>
+      </div>
+    </div>
+    <div id="frameSize" class="buttonSt">
+      <div class="labelSt">Frame Size</div> 
+      <div class="displayBoxParent">
+        <div class="displayBox">
+          <input class="frameSize" type="range" id="frameSizeInput" size="100" min="0.3" max="2" value="1" step="0.001" />
+        </div>
+      </div>
+    </div>
+    <div id="numberOfstroke" class="buttonSt">
+      <label class="labelSt">Strokes Number</label>
+      <div id="stroke" class="displayBoxParent">
+        <div id="strokeScreen" class="displayBox">
+          <div id="strokeMinus" class="plusMinus">➖</div>
+          <div id="strokeValue">1500</div>
+          <div id="strokePlus" class="plusMinus">➕</div>
+        </div>
+      </div>
+    </div>
+    <div id="makeArt" class="buttonSt01">
+      <div id="strokeReady">
+        Generate
+      </div>
+    </div>
+  </div>
+  <div id="step02">
+    <div id="resultView" class="buttonSt01">
+      <div id="rView" style="height:100%;" class="displayBoxParent">
+        <div id="imgorstring" class="displayBox">
+          <div translate="no" class="selected">STRING</div>
+          <div translate="no" >IMAGE</div>
+        </div>
+      </div>
+    </div>
+    <div id="colorBalance" class="buttonSt">
+      <div class="labelSt">Color Balance</div>
+      <div id="balance" class="displayBoxParent">
+        <div id="balanceScreen" class="displayBox">
+          <div id="balanceMinus" class="plusMinus">➖</div>
+          <div id="balanceValue">50</div>
+          <div id="balancePlus" class="plusMinus">➕</div>
+        </div>
+      </div>
+    </div>
+    <div id="frameColor" class="buttonSt">
+      <label class="labelSt">Frame Color</label>
+      <div id="fcolor" class="displayBoxParent">
+        <div id="fcolorScreen" class="displayBox">
+          <div id="black" class="colorbox"></div>
+          <div id="navy" class="colorbox"></div>
+          <div id="saddlebrown" class="colorbox"></div>
+        </div>
+      </div>
+    </div>
+    <div id="pinCover" class="buttonSt">
+      <label class="labelSt">Pin Cover</label>
+      <div id="pcover" class="displayBoxParent">
+        <div id="pcoverScreen" class="displayBox">
+          <div id="nocover" class="colorbox"></div>
+          <div id="black" class="colorbox"></div>
+          <div id="navy" class="colorbox"></div>
+          <div id="saddlebrown" class="colorbox"></div>
+        </div>
+      </div>
+    </div>
+    <div id="saveThings" class="buttonSt01">
+      <div class="labelSt">Save</div>
+      <div id="saveBox" style="height:100%;" class="displayBoxParent">
+        <div id="saveList" style="height:100%;" class="displayBox">
+          <div translate="no">IMAGE</div>
+          <div translate="no">DATA</div>
+        </div>
+      </div>
+    </div>
+    <div id="remakeArt" class="buttonSt01">
+      <div id="remakeReady">
+        Regenerate
+      </div>
+    </div>
+    <div id="3dview" class="buttonSt01">
+      <a href="index3d.html" target="_blank">
+        <div id="threeview">
+        3D View
+        </div>
+      </a>
+    </div>
+    <div id="howtomake" class="buttonSt01">
+      <a href="indexmaking.html" target="_blank">
+        <div id="howtoview">
+        How to Make
+        </div>
+      </a>
+    </div>
+    <div id="backToStarted" class="buttonSt01">
+      <div id="backtostarted">
+        Back To Started
+      </div>
+    </div>
+  </div>
+  </div>
+  <div id="sketch-holder"></div>
+</body></html>

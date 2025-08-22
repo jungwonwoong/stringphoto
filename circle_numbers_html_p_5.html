@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CircleNumbers — p5.js 미리보기 & 실제크기 SVG 저장</title>
+  <style>
+    :root { --gap: 10px; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; margin: 0; padding: 24px; background: #f7f7f9; }
+    h1 { font-size: 20px; margin: 0 0 16px; }
+    .panel { display: grid; grid-template-columns: 1fr; gap: var(--gap); max-width: 940px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); padding: 16px; }
+    .row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap); align-items: end; }
+    .row .field { display: grid; gap: 6px; }
+    label { font-size: 12px; color: #333; }
+    input[type="number"] { padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; }
+    .actions { display: flex; gap: var(--gap); flex-wrap: wrap; }
+    button { cursor: pointer; border: 0; border-radius: 12px; padding: 12px 16px; font-weight: 600; background: #222; color: #fff; }
+    button.secondary { background: #ebedf0; color: #111; }
+    #previewWrap { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    #meta { font-size: 12px; color: #555; }
+    canvas { background: #fff; border-radius: 12px; box-shadow: inset 0 0 0 1px #eee; }
+  </style>
+  <!-- p5.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
+</head>
+<body>
+  <div class="panel">
+    <h1>CircleNumbers — 원주 숫자 라벨러 (웹 미리보기 + 실제 크기 SVG 저장)</h1>
+
+    <div class="card">
+      <div class="row">
+        <div class="field">
+          <label for="count">count (정수, 개수)</label>
+          <input id="count" type="number" min="1" step="1" value="320" />
+        </div>
+        <div class="field">
+          <label for="radius">radius (mm, 원 반지름)</label>
+          <input id="radius" type="number" min="1" step="0.1" value="200" />
+        </div>
+        <div class="field">
+          <label for="fontSize">font_size (px, 5의 배수 기본 크기)</label>
+          <input id="fontSize" type="number" min="1" step="0.5" value="10" />
+        </div>
+        <div class="field">
+          <label for="margin">margin (mm, 도면 여백)</label>
+          <input id="margin" type="number" min="0" step="0.1" value="10" />
+        </div>
+      </div>
+      <div class="actions" style="margin-top:12px;">
+        <button id="apply">미리보기 업데이트</button>
+        <button id="saveSvg" class="secondary">실제 크기 SVG 저장</button>
+      </div>
+    </div>
+
+    <div class="card" id="previewWrap">
+      <div id="meta">미리보기는 화면 크기에 맞춰 축소되어 표시됩니다. (출력/저장은 실제 mm 단위)</div>
+      <div id="sketch"></div>
+    </div>
+  </div>
+
+<script>
+// ===== Utilities =====
+const PX_PER_MM = 96 / 25.4; // CSS 96dpi 기준
+function mmToPx(mm) { return mm * PX_PER_MM; }
+function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+// ===== Parameters (bound to inputs) =====
+const ui = {
+  count: document.getElementById('count'),
+  radius: document.getElementById('radius'),
+  fontSize: document.getElementById('fontSize'),
+  margin: document.getElementById('margin'),
+  apply: document.getElementById('apply'),
+  saveSvg: document.getElementById('saveSvg')
+};
+
+function getParams(){
+  const count = Math.max(1, Math.floor(+ui.count.value || 1));
+  const radiusMM = Math.max(1, +ui.radius.value || 1);
+  const fontSizePX = Math.max(1, +ui.fontSize.value || 1);
+  const marginMM = Math.max(0, +ui.margin.value || 0);
+  return { count, radiusMM, fontSizePX, marginMM };
+}
+
+// ===== p5 Preview Sketch =====
+let currentSketch = null;
+function makeSketch(){
+  const p = (s) => {
+    let count, radiusMM, fontSizePX, marginMM;
+    let Wpx, Hpx, scale;
+    let cx, cy, radiusPx;
+
+    s.setup = () => {
+      const params = getParams();
+      ({count, radiusMM, fontSizePX, marginMM} = params);
+
+      // 실제 사이즈(px)
+      const diameterMM = radiusMM * 2;
+      const fullWpx = mmToPx(diameterMM + 2*marginMM);
+      const fullHpx = fullWpx;
+
+      // 미리보기 스케일 (최대 720px 상자에 맞춤)
+      const maxSide = 720;
+      scale = Math.min(1, maxSide / Math.max(fullWpx, fullHpx));
+
+      Wpx = Math.ceil(fullWpx * scale);
+      Hpx = Math.ceil(fullHpx * scale);
+
+      const cnv = s.createCanvas(Wpx, Hpx);
+      cnv.parent('sketch');
+      s.textAlign(s.LEFT, s.CENTER);
+      s.noStroke();
+
+      cx = Wpx/2; cy = Hpx/2;
+      radiusPx = mmToPx(radiusMM) * scale;
+    };
+
+    s.draw = () => {
+      s.clear();
+      s.background(255);
+
+      const params = getParams();
+      const count = params.count;
+      const fontMajor = params.fontSizePX * scale;
+      const fontMinor = clamp((params.fontSizePX - 3), 1, 999) * scale;
+
+      // 가이드 원 (미리보기용)
+      s.push();
+      s.noFill();
+      s.stroke(230);
+      s.circle(cx, cy, radiusPx*2);
+      s.pop();
+
+      for (let i=0; i<count; i++){
+        const angle = 2 * Math.PI * i / count; // 0~2pi
+        const x = cx + radiusPx * Math.cos(angle);
+        const y = cy + radiusPx * Math.sin(angle);
+
+        const isMajor = (i % 5 === 0);
+        const label = isMajor ? String(i) : String(i % 10); // 115, 6, 7, 8, 9, 120 패턴
+        s.push();
+        s.translate(x, y);
+        s.rotate(angle);
+        s.fill(0);
+        s.textSize(isMajor ? fontMajor : fontMinor);
+        s.text('\u2501' + label, 0, 0); // '━' + label
+        s.pop();
+      }
+
+      // 여백 테두리 표시 (미리보기 정보)
+      s.push();
+      s.noFill();
+      s.stroke(240);
+      s.rect(0.5, 0.5, Wpx-1, Hpx-1, 8);
+      s.pop();
+    };
+
+    s.windowResized = () => {
+      // 단순 재생성으로 대응
+      s.remove();
+      currentSketch = new p5(makeSketch, 'sketch');
+    };
+  };
+  return p;
+}
+
+function refreshSketch(){
+  if(currentSketch){ currentSketch.remove(); }
+  // 스케치 컨테이너 초기화
+  document.getElementById('sketch').innerHTML = '';
+  currentSketch = new p5(makeSketch(), 'sketch');
+}
+
+ui.apply.addEventListener('click', refreshSketch);
+['change','input'].forEach(evt => {
+  ui.count.addEventListener(evt, ()=>{});
+  ui.radius.addEventListener(evt, ()=>{});
+  ui.fontSize.addEventListener(evt, ()=>{});
+  ui.margin.addEventListener(evt, ()=>{});
+});
+
+// 첫 로드 시 미리보기 생성
+refreshSketch();
+
+// ===== SVG Generation & Download =====
+function generateSVGString(){
+  const {count, radiusMM, fontSizePX, marginMM} = getParams();
+  const diameterMM = radiusMM * 2;
+  const widthMM = diameterMM + 2*marginMM;
+  const heightMM = widthMM; // 정사각
+
+  const widthPX = mmToPx(widthMM);
+  const heightPX = mmToPx(heightMM);
+  const cxPX = widthPX/2;
+  const cyPX = heightPX/2;
+  const radiusPX = mmToPx(radiusMM);
+
+  const fontMinorPX = clamp(fontSizePX - 3, 1, 999);
+
+  // SVG 헤더: 실제 단위(mm)와 viewBox(px) 동시 지정 → 출력시 실제 크기 보장
+  let svg = '';
+    svg += `<svg xmlns="http://www.w3.org/2000/svg" width="${widthMM}mm" height="${heightMM}mm" viewBox="0 0 ${widthPX} ${heightPX}">\n`;
+  svg += `  <g id="circle-numbers" font-family="Arial, Helvetica, sans-serif" text-anchor="start" dominant-baseline="middle" fill="#000">\n`;
+
+  for(let i=0;i<count;i++){
+    const angle = 2*Math.PI*i/count;
+    const x = cxPX + radiusPX * Math.cos(angle);
+    const y = cyPX + radiusPX * Math.sin(angle);
+    const isMajor = (i % 5 === 0);
+    const label = isMajor ? String(i) : String(i % 10);
+    const fontSize = isMajor ? fontSizePX : fontMinorPX;
+    const deg = angle * 180 / Math.PI;
+
+    svg += `    <text font-size="${fontSize}px" transform="rotate(${deg},${x},${y})">` +
+           `<tspan x="${x}" y="${y}">\u2501${escapeXml(label)}</tspan>` +
+           `</text>\n`;
+  }
+
+  svg += `  </g>\n`;
+  svg += `</svg>`;
+  return svg;
+}
+
+function escapeXml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+}
+
+ui.saveSvg.addEventListener('click', () => {
+  const svg = generateSVGString();
+  const blob = new Blob([svg], {type: 'image/svg+xml;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const {count, radiusMM} = getParams();
+  a.href = url;
+  a.download = `CircleNumbers_r${radiusMM}mm_c${count}.svg`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+});
+</script>
+</body>
+</html>
