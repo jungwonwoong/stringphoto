@@ -1,0 +1,23 @@
+# 데이터베이스 설정 파일 (보안상 업로드하지 않음)
+config/database.php
+
+# 환경 설정 파일
+.env
+
+# 업로드된 파일들
+uploads/
+
+# 로그 파일
+*.log
+
+# 임시 파일
+*.tmp
+*.temp
+
+# IDE 설정 파일
+.vscode/
+.idea/
+
+# OS 생성 파일
+.DS_Store
+Thumbs.db
