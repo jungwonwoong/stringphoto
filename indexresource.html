@@ -10,6 +10,9 @@
     .title { font-weight:700; font-size:1.2rem; }
     .back { background:#6c63ff; color:#fff; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; }
     .wrap { max-width:1100px; margin:0 auto; padding:16px; }
+    .tabs { display:flex; gap:8px; margin:8px 0 16px; flex-wrap:wrap; }
+    .tab { background:#f0f0f0; color:#666; border:1px solid #ddd; border-radius:20px; padding:8px 14px; font-weight:600; cursor:pointer; }
+    .tab.active { background:#6c63ff; color:#fff; border-color:#6c63ff; }
     .hint { color:#666; font-size:0.95rem; margin:8px 0 16px; }
     .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:12px; }
     .card { background:#fff; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05); overflow:hidden; display:flex; flex-direction:column; }
@@ -29,7 +32,8 @@
     <button class="back" onclick="location.href='index.html'">메인으로</button>
   </header>
   <div class="wrap">
-    <div class="hint">resources/ 와 uploads/ 폴더의 파일을 나열합니다. 이미지/영상은 미리보기, 그 외는 파일형식으로 표시합니다.</div>
+    <div class="hint">resources/ 와 uploads/ 폴더의 파일 + dothome에서 가져온 카테고리 매핑을 함께 표시합니다.</div>
+    <div class="tabs" id="tabs"></div>
     <div id="grid" class="grid"></div>
   </div>
 
@@ -38,6 +42,12 @@
     const REPO = 'stringphoto';
     const BRANCH = 'main';
     const DIRS = ['resources', 'uploads'];
+    const CATEGORY_MAP = {
+      'machine': '머신자료',
+      'request': '요청자료',
+      'result': '결과물자료',
+      'all': '전체'
+    };
 
     function isImage(name){ return /\.(png|jpg|jpeg|gif|webp|bmp|svg)$/i.test(name); }
     function isVideo(name){ return /\.(mp4|webm|ogg|mov|m4v)$/i.test(name); }
@@ -108,15 +118,121 @@
       return item;
     }
 
+    async function loadMapping(){
+      try {
+        const r = await fetch('resources/resources.json');
+        if (!r.ok) return [];
+        const data = await r.json();
+        return Array.isArray(data) ? data : [];
+      } catch(e){ return []; }
+    }
+
+    function mapItemToCard(item){
+      const path = item.url.startsWith('http') ? null : item.url.replace(/^\/?/, '');
+      const name = item.title || (path ? path.split('/').pop() : 'link');
+      const isImg = item.type === 'image';
+      const isVid = item.type === 'video';
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'card';
+      const t = document.createElement('div');
+      t.className = 'thumb';
+      if (isImg && path){
+        const img = document.createElement('img');
+        img.loading = 'lazy';
+        img.src = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${path}`;
+        t.appendChild(img);
+      } else if (isVid && path){
+        const v = document.createElement('video');
+        v.src = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${path}`;
+        v.controls = true;
+        t.appendChild(v);
+      } else if (item.type === 'link'){
+        const label = document.createElement('div');
+        label.textContent = 'LINK';
+        label.style.fontSize = '2.2rem';
+        label.style.fontWeight = '800';
+        label.style.color = '#6c63ff';
+        t.appendChild(label);
+      } else {
+        const label = document.createElement('div');
+        label.textContent = (item.type || 'FILE').toUpperCase();
+        label.style.fontSize = '2.2rem';
+        label.style.fontWeight = '800';
+        label.style.color = '#6c63ff';
+        t.appendChild(label);
+      }
+      const m = document.createElement('div');
+      m.className = 'meta';
+      const nm = document.createElement('div');
+      nm.className = 'name';
+      nm.title = name;
+      nm.textContent = name;
+      const row = document.createElement('div');
+      row.className = 'row';
+      const a1 = document.createElement('a');
+      a1.className = 'btn';
+      a1.target = '_blank';
+      if (item.url.startsWith('http')) {
+        a1.href = item.url;
+      } else {
+        a1.href = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${path}`;
+      }
+      a1.textContent = '원본 열기';
+      const a2 = document.createElement('a');
+      a2.className = 'btn';
+      a2.target = '_blank';
+      if (item.url.startsWith('http')) {
+        a2.href = item.url;
+      } else {
+        a2.href = `https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/${path}`;
+      }
+      a2.textContent = 'GitHub';
+      row.append(a1, a2);
+      m.append(nm, row);
+      itemDiv.append(t, m);
+      itemDiv.dataset.category = item.category || 'etc';
+      return itemDiv;
+    }
+
+    function renderTabs(active){
+      const tabs = document.getElementById('tabs');
+      tabs.innerHTML = '';
+      const ordered = ['all','machine','request','result'];
+      for (const key of ordered){
+        const btn = document.createElement('button');
+        btn.className = 'tab' + (key===active ? ' active':'');
+        btn.textContent = CATEGORY_MAP[key];
+        btn.addEventListener('click', ()=> applyFilter(key));
+        tabs.appendChild(btn);
+      }
+    }
+
+    function applyFilter(cat){
+      renderTabs(cat);
+      const grid = document.getElementById('grid');
+      Array.from(grid.children).forEach(card => {
+        const c = card.dataset.category || 'etc';
+        card.style.display = (cat==='all' || cat===c) ? '' : 'none';
+      });
+    }
+
     async function main(){
       const grid = document.getElementById('grid');
+      // 1) dothome 매핑 로드 후 렌더
+      const mapping = await loadMapping();
+      mapping.forEach(item => grid.appendChild(mapItemToCard(item)) );
+      // 2) 폴더 내 나머지 파일도 추가 표시(중복 방지)
+      const mappedSet = new Set(mapping.filter(m=>!m.url.startsWith('http')).map(m=>m.url.replace(/^\/?/, '')));
       for (const dir of DIRS){
         const files = await listDir(dir).catch(()=>[]);
-        files.forEach(f=> grid.appendChild(fileToCard(f)) );
+        files.forEach(f=>{
+          if (!mappedSet.has(f.path)) grid.appendChild(fileToCard(f));
+        });
       }
       if (!grid.children.length){
         grid.innerHTML = '<div style="grid-column:1/-1;color:#777;text-align:center;">표시할 파일이 없습니다.</div>';
       }
+      applyFilter('all');
     }
     main();
   </script>
