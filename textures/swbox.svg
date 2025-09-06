@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="69.998993mm"
+   height="69.998711mm"
+   viewBox="0 0 69.998993 69.998711"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-71.321595,-103.40262)">
+    <g
+       id="g109"
+       transform="rotate(90,63.553865,-133.30226)"
+       style="display:inline">
+      <path
+         style="fill:#000000;fill-opacity:0.378035;stroke:none"
+         d="m 366.1845,-166.34899 h -8.7735 v 4.12028 5.162 3.81972 h 8.3565 0.417 v -3.81972 -5.162 z"
+         id="path102" />
+      <path
+         style="display:inline;fill:#000000;fill-opacity:0.378035;stroke:none;stroke-opacity:1"
+         d="m 370.25746,-206.06899 v 59.999 a 5,5 135 0 1 -5,5 H 355.969 a 4.9998272,4.9998272 45.00099 0 1 -4.99983,-5 l 1.8e-4,-5.12964 H 313.943 v 5.12964 a 5,5 135 0 1 -5,5 h -3.68425 a 5,5 45 0 1 -5,-5 v -59.999 a 5,5 135 0 1 5,-5 l 59.99871,0 a 5,5 45 0 1 5,5 z"
+         id="path1-0" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0616228;stroke-linecap:square"
+         id="path103"
+         cx="319.60858"
+         cy="-198.52383"
+         r="3.7"
+         transform="translate(2.9166666e-6,-1.125e-5)" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0616228;stroke-linecap:square"
+         id="circle103"
+         cx="345.44656"
+         cy="-198.5248"
+         r="3.7"
+         transform="translate(2.9166666e-6,-1.125e-5)" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0464428;stroke-linecap:square"
+         id="path109"
+         cx="305.28482"
+         cy="-206.05521"
+         r="1.5" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0464428;stroke-linecap:square"
+         id="circle110"
+         cx="365.27008"
+         cy="-206.05772"
+         r="1.5" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0464428;stroke-linecap:square"
+         id="circle111"
+         cx="305.28506"
+         cy="-146.05222"
+         r="1.5" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0464428;stroke-linecap:square"
+         id="circle112"
+         cx="365.26959"
+         cy="-146.05396"
+         r="1.5" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0616228;stroke-linecap:square"
+         id="circle104"
+         cx="319.6185"
+         cy="-182.53017"
+         r="3.7"
+         transform="translate(2.9166666e-6,-1.125e-5)" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0616228;stroke-linecap:square"
+         id="circle105"
+         cx="345.44647"
+         cy="-182.52364"
+         r="3.7"
+         transform="translate(2.9166666e-6,-1.125e-5)" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0616228;stroke-linecap:square"
+         id="circle106"
+         cx="361.01089"
+         cy="-190.63907"
+         r="3.7"
+         transform="translate(2.9166666e-6,-1.125e-5)" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0616228;stroke-linecap:square"
+         id="circle107"
+         cx="327.67197"
+         cy="-165.9304"
+         r="3.7"
+         transform="translate(2.9166666e-6,-1.125e-5)" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0616228;stroke-linecap:square"
+         id="circle108"
+         cx="348.2644"
+         cy="-160.76921"
+         r="3.7"
+         transform="translate(2.9166666e-6,-1.125e-5)" />
+      <circle
+         style="fill:#000000;fill-opacity:0.378035;fill-rule:evenodd;stroke:none;stroke-width:0.0616228;stroke-linecap:square"
+         id="circle109"
+         cx="311.73734"
+         cy="-165.92874"
+         r="3.7"
+         transform="translate(2.9166666e-6,-1.125e-5)" />
+    </g>
+  </g>
+</svg>

@@ -1,67 +1,142 @@
-html, body {
+
+body{
   margin: 0;
-  padding: 0;
+  margin-top: 1px;
   overflow: hidden;
   user-select: none;
-  -webkit-text-size-adjust : none;
-  -ms-text-size-adjust : none;
-  -moz-text-size-adjust : none;
-  -o-text-size-adjust : none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;    
+  -webkit-tap-highlight-color: transparent;
 }
-canvas {
-  display: block;
-  border:0px solid red;
- }
+*{
+  -webkit-tap-highlight-color: transparent;
+}
+#bodyContainer {
+    width: 100%;
+    height: 100%;
+
+  }
+#sketch-holder {
+  width: 100%;
+}
 #toolBar {
+  display: block;
+  width: 100%;
+  height: 15%;
   position:absolute;
-  border:0px solid red;
-  border-radius: 5px;
-  background-color:rgb(34, 34, 34);
+  z-index: 1;
 }
-.buttonSt {
-  border:2px solid rgb(34, 34, 34);
-  background-color:rgb(92, 92, 92);
-  border-radius: 10px;
-  color:rgb(255, 255, 255);
-  text-align: center;
+#step01 {
   display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-}
-.buttonSt01 {
-  border:2px solid rgb(34, 34, 34);
-  background-color:rgb(92, 92, 92);
-  border-radius: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  color:rgb(255, 255, 255);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-}
-.buttonSt:hover {
-  background-color: rgb(160, 160, 160);
-  color:rgb(0, 0, 0);
-}
-.buttonSt01:hover {
-  background-color: rgb(160, 160, 160);
-  color:rgb(0, 0, 0);
-}
-.labelSt {
-  font-size: medium;
-  color: inherit;
+  justify-content: space-between;
   width: 100%;
   height: 50%;
+}
+
+#numbers {
+  width: 50%;
+}
+#makeArt {
+  width: 25%;
+}
+#step02 {
+  position: absolute;
+  top: 0px;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 50%;
+}
+#saveThings {
+  width: 20%;
+  border: 2px solid rgb(255, 255, 255);
+  background-color: rgb(255, 255, 255);
+  border-radius: 10px;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+.buttonSt {
+  border:2px solid rgb(255, 255, 255);
+  background-color:rgb(255, 255, 255);
+  border-radius: 10px;
+  color:rgb(0, 0, 0);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+#inputImage {
+  width: 25%;
+  font-size: 20px;
+  border:2px solid rgb(0, 0, 0);
+  background-color:rgb(255, 255, 255);
+  border-radius: 10px;
+
+  color:rgb(0, 0, 0);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+#inputImage:active {
+  background-color: rgba(124, 220, 255, 0.5);
+
+}
+#makeArt {
+  width: 25%;
+  font-size: 20px;
+  border:2px solid rgb(0, 0, 0);
+  background-color:rgb(255, 255, 255);
+  border-radius: 10px;
+  margin-right: 5px;
+  padding-bottom: 5px;
+  color:rgb(0, 0, 0);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+#makeArt:active {
+  background-color: rgba(124, 220, 255, 0.5);
+}
+
+#balanceScreen {
+  display: flex;
+  opacity: 0;
+  
+  justify-content: space-around;
+  width:100%;
+}
+#balance {
+  height: 75%;
+}
+#saveList {
+  display: flex;
+  justify-content: space-around;
+  width:100%;
+}
+.labelSt {
+  font-size: 1em;
+  color: inhebrit;
+  width: 100%;
+  height: 25%;
   padding-top: 2px;
   padding-bottom: 2px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 #strokeReady {
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: x-large;
+  font-size: 1em;
   font-weight: 1000;
   color:rgb(82, 18, 18);
 }
@@ -84,23 +159,27 @@ canvas {
   color:rgb(82, 18, 18);
 }
 .displayBox {
-  height:auto;
+  display: flex;
+  justify-content: space-around;
   width:100%;
-  font-size: 1em;
+  font-size: 0.8em;
   color:black;
-  display:flex;
-  justify-content:space-around; 
 }
+
 .displayBoxParent {
+  display: flex;
   width:100%;
-  height:50%;
   padding-top:2px;
   padding-bottom:2px;
 }
 .plusMinus {
+  background-color: rgba(124, 220, 255, 1);
   cursor: pointer;
   border:1px solid;
-  border-radius:10px;
+  width: 30%;
+}
+#plusMinus:active {
+  background-color: rgba(124, 220, 255, 0.5);
 }
 #inputImage input[type="file"] {
   position: absolute;
@@ -109,15 +188,18 @@ canvas {
   padding: 0;
   overflow: hidden;
   border: 0;
+  background-color: white;
 }
 .frameSize {
   width: 90%;
   border-radius: 5px;
   cursor: pointer;
 }
-#frameList div {
+#frameList{
+  display: flex;
+  justify-content: space-around;
   background-color: rgb(133, 133, 133);
-  width:20%;
+  width:100%;
   color:rgb(34, 34, 34);
   font-size: small;
   text-align:center;
@@ -127,6 +209,7 @@ canvas {
 }
 #frameList div.selected {
   background-color: rgb(255, 255, 255);
+  
 }
 #frames {
   translate: "no";
@@ -147,8 +230,8 @@ canvas {
   position:absolute;
   width:100%;
   height:0px;
-  background-color: white;
-  opacity: 0.5;
+  background-color: rgb(255, 0, 0);
+  opacity: 1;
   z-index: 1;
   border-radius: 5px;
 }
@@ -157,13 +240,17 @@ canvas {
   width:100%;
   height:0px;
   background-color: white;
-  opacity: 0.5;
+  opacity: 1;
   z-index: 1;
   border-radius: 5px;
 }
-#imgorstring div {
-  background-color: rgb(133, 133, 133);
-  width:50%;
+#resultView {
+  width: 20%;
+}
+#imgorstring {
+  background-color: rgb(255, 255, 255);
+  height: 100%;
+  width:25%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -172,8 +259,30 @@ canvas {
   padding-bottom: 5px;
   cursor: pointer;
 }
+#strokeScreen {
+  display: flex;
+  justify-content: space-around;
+  width:100%;
+  font-size: 1em;
+}
 #imgorstring div.selected {
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(159, 218, 245);
+}
+#cstr {
+  background-image: url(pattern/str.png); /* Specify the image path */
+  background-size: contain; /* Optional: Make the image cover the entire div */
+  background-position: center; /* Optional: Center the image */
+  background-repeat: no-repeat; /* Optional: Prevent image repetition */
+  height: 70%; /* Example: Set a height for the div */
+  width: 100%; /* Example: Set a width for the div */
+}
+#cimg {
+  background-image: url(pattern/img.png); /* Specify the image path */
+  background-size: contain; /* Optional: Make the image cover the entire div */
+  background-position: center; /* Optional: Center the image */
+  background-repeat: no-repeat; /* Optional: Prevent image repetition */
+  height: 70%; /* Example: Set a height for the div */
+  width: 100%; /* Example: Set a width for the div */
 }
 .colorbox:empty {
   cursor: pointer;
@@ -194,4 +303,87 @@ canvas {
 }
 #saveList div:hover {
   background-color: rgb(255, 255, 255);
+}
+#colorBalance {
+  width: 20%;
+}
+#remakeArt {
+  width: 20%;
+  display: flex;
+  justify-content: center;
+}
+#backToStarted {
+  width: 15%;
+  display: flex;
+  justify-content: center;
+}
+@media (min-width:1024px) {
+  #toolBar{
+    width: auto;
+    height: auto;
+  }
+  #step01 {
+    display: block;
+    height: auto;
+  }
+  #inputImage {
+    width: 100%;
+    height: 50px;
+  }
+  #numbers {
+    width: 100%;
+  }
+  #makeArt {
+    width: 100%;
+  }
+  #step02 {
+    display: block;
+    height: auto;
+  }
+  #cstr {
+    height: 50px; /* Example: Set a height for the div */
+  }
+  #cimg {
+    height: 50px; /* Example: Set a height for the div */
+  }
+  .labelSt {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1em;
+    color: inhebrit;
+    width: 100%;
+    height: 50%;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+  #strokeReady {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: x-large;
+    font-weight: 1000;
+    color:rgb(82, 18, 18);
+  }
+  #imgorstring {
+    width:100%;
+
+  }
+  #saveThings {
+    width: 100%;
+  }
+  #colorBalance {
+    width: 100%;
+  }
+  #remakeArt {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  #backToStarted {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
 }

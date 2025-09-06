@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MARK String Art</title>
+    <script src="p5.min.js"></script>
+   
+    <script src="marksketch.js"></script>
+    <meta name="keyword" content="stringart, stringphoto, craft, mark">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+      }
+      
+      #control-panel {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+      }
+      
+      #control-panel button {
+        height: 50px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background-color: #4CAF50;
+        color: white;
+        padding: 0 20px;
+        transition: background-color 0.3s;
+        min-width: 120px;
+      }
+      
+      #control-panel button:hover {
+        background-color: #45a049;
+      }
+      
+      #control-panel button:active {
+        background-color: #3d8b40;
+      }
+      
+      #file-btn {
+        background-color: #2196F3;
+      }
+      
+      #file-btn:hover {
+        background-color: #1976D2;
+      }
+      
+      #mark-connect-btn {
+        background-color: #FF9800;
+      }
+      
+      #mark-connect-btn:hover {
+        background-color: #F57C00;
+      }
+      
+      #start-btn {
+        background-color: #4CAF50;
+      }
+      
+      #pause-btn {
+        background-color: #FFC107;
+      }
+      
+      #pause-btn:hover {
+        background-color: #FFA000;
+      }
+      
+      #stop-btn {
+        background-color: #F44336;
+      }
+      
+      #stop-btn:hover {
+        background-color: #D32F2F;
+      }
+      
+      #reset-btn {
+        background-color: #9C27B0;
+      }
+      
+      #reset-btn:hover {
+        background-color: #7B1FA2;
+      }
+      
+      .main-content {
+        width:100%;
+      }
+      
+      #sketch-container {
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="control-panel">
+      <button id="file-btn">file</button>
+      <input type="file" id="file-input" accept=".txt" style="display: none;">
+      
+      <button id="mark-connect-btn">MARK연결</button>
+      
+      <button id="handmade-btn">handmade</button>
+    </div>
+    
+    <div id="main-content">
+      <div id="sketch-container">
+        <!-- p5.js 스케치가 여기에 렌더링됩니다 -->
+      </div>
+      <!-- homemade 모드용 터치 버튼 영역 -->
+      <button id="homemade-left" style="display:none; position:fixed; top:0; left:0; width:50vw; height:100vh; z-index:2000; background:transparent; border:none;"></button>
+      <button id="homemade-right" style="display:none; position:fixed; top:0; left:50vw; width:50vw; height:100vh; z-index:2000; background:transparent; border:none;"></button>
+    </div>
+    
+    <script>
+      // 버튼 이벤트 리스너들
+      document.getElementById('file-btn').addEventListener('click', function() {
+        console.log('file 버튼 클릭됨');
+        document.getElementById('file-input').click();
+      });
+      
+      document.getElementById('mark-connect-btn').addEventListener('click', function() {
+        console.log('MARK연결 버튼 클릭됨');
+        if (typeof connectMark === 'function') {
+          connectMark();
+        }
+      });
+
+      // homemade 모드 활성화
+      document.getElementById('handmade-btn').addEventListener('click', function() {
+        console.log('handmade 버튼 클릭됨');
+        document.getElementById('homemade-left').style.display = 'block';
+        document.getElementById('homemade-right').style.display = 'block';
+      });
+
+      // homemade 왼쪽/오른쪽 버튼 이벤트
+      document.getElementById('homemade-left').addEventListener('click', function() {
+        console.log('이전 시퀀스');
+        if (typeof homemadePrevSequence === 'function') {
+          homemadePrevSequence();
+        }
+      });
+      document.getElementById('homemade-right').addEventListener('click', function() {
+        console.log('다음 시퀀스');
+        if (typeof homemadeNextSequence === 'function') {
+          homemadeNextSequence();
+        }
+      });
+
+      document.getElementById('file-input').addEventListener('change', handleFileSelect);
+    </script>
+  </body>
+</html>

@@ -1,9 +1,9 @@
-var NR_PINS=200;
-var LAST_NR_PINS=200;
-var NumberOfStroke = 1500;
+var NR_PINS=320;
+var LAST_NR_PINS=320;
+var NumberOfStroke = 2000;
 var lineFade = 50;
 var minDist = 15;
-var lineWidth = 0.3;
+var lineWidth = 0.1;
 var lineAlpha = 80;
 var lineVarration = 0;
 var pinSize = 5;
@@ -160,7 +160,7 @@ function drawStrings() {
     }
 }
 function drawSignStrings(current, next) {
-    stroke('black');
+    stroke(0, 0, 0, lineAlpha);
     strokeWeight((lineWidth));
     noFill();
     var variation = lineVarration;
@@ -288,41 +288,27 @@ function balanceColor(resultImage, newColorImg) {
     newColorImg.updatePixels();
 }
 function framedrawPins(pins) {
+    push();
     if(pins == 240) framethickness = SIZE*0.1134/2;
     if(pins == 280) framethickness = SIZE*0.0866/2;
     if(pins == 320) framethickness = SIZE*0.1015/2;
     ellipseMode(CENTER);
-    fill('rgba(100,100,100, 0)');
-    strokeWeight(canWidth/2);
-    stroke('rgba(255,255,255,0)');
-    ellipse(canWidth/2, canHeight/2, SIZE+canWidth/2, SIZE+canWidth/2);
-    strokeWeight(framethickness);
-    stroke(fColor);//'rgb(205,133,63)');
-    ellipse(canWidth/2, canHeight/2, SIZE+framethickness, SIZE+framethickness);
-    stroke(0);
+    noFill();
+    stroke('rgba(0,0,0,1)');
     strokeWeight(1);
-
-    if(!pinCoverUse){
-        translate(canWidth/2 ,canHeight/2);
-        for (var i = 0; i < pins; i++) {
-            angleMode(RADIANS);
-            rectMode(CENTER);
-            rotate((TWO_PI / float(pins)));
-            stroke('rgb(100,100,100)');
-            strokeWeight(1);
-            fill(0);
-            rect(SIZE/2,0,8,8)
-            noStroke();
-            fill('rgb(255,215,000)');
-            rect(SIZE/2+5,0,10,2);
-        }
-        translate(-canWidth/2,-canHeight/2);
-    } else {
-        strokeWeight(14);
-        stroke(cColor);
-        ellipse(canWidth/2, canHeight/2, SIZE+7, SIZE+7);
-    }
     
+    translate(canWidth/2 ,canHeight/2);
+    ellipse(0, 0, SIZE, SIZE);
+    for (var i = 0; i < pins; i++) {
+        angleMode(RADIANS);
+        ellipseMode(CENTER);
+        rotate((TWO_PI / float(pins)));
+        stroke('rgb(100,100,100)');
+        strokeWeight(1);
+        fill(0);
+        ellipse(SIZE/2,0,2,2)
+    }
+    pop();
     rectMode(CORNER)
 }
 function rulerView() {

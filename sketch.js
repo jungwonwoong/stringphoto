@@ -4,54 +4,62 @@ var sPage;
 var editPage;
 var genrPage;
 var state;
+var devMode = 0; //0:mobile, 1:pc
 
 
 function setup() {
     
-    var colorbox = document.getElementsByClassName('colorbox');
-    for( var i = 0; i < colorbox.length; i++ ){
-        var section1 = colorbox.item(i);
-        section1.style.height = `${section1.getBoundingClientRect().width}px`;
-    }
-
     this.step01 = document.getElementById('step01');
     this.step02 = document.getElementById('step02');
     this.colorBalance = document.getElementById('colorBalance');
-    if (float(screen.width) / float(screen.height) >= 1) {
-        adaptWidth = screen.width;
-        adaptHeight = screen.height;
+    adaptWidth = screen.width;
+    adaptHeight = window.innerHeight;
+    const userAgent = navigator.userAgent;
+
+    canWidth=adaptWidth;
+    canHeight=adaptHeight;
+    
+    if (/Mobi|Android|iPhone|iPad/i.test(userAgent)) {
+        // 모바일 기기일 경우
+        SIZE=canWidth*0.95;
+        lineWidth=0.15;
+        lineAlpha = 140;
+        devMode = 0;
     } else {
-        adaptWidth = screen.height;
-        adaptHeight = screen.width;
+        // PC일 경우
+        SIZE=adaptHeight*0.8;
+        lineWidth=0.2
+        lineAlpha = 200;
+        devMode = 1;
     }
-    SIZE=screen.height*0.6;
-    var a=document.getElementById('toolBar').getBoundingClientRect().width;
-    createCanvas(adaptWidth, adaptHeight).parent('sketch-holder').position(a, 0);
+
+    createCanvas(adaptWidth, adaptHeight).parent('sketch-holder').position(0, 0);
     var saveList = document.getElementById('saveList');
     saveList.addEventListener('click', e => {
-        if(e.target.innerText == 'IMAGE') {
+        if(e.target.innerText == 'IMG') {
             saveCanvas('myCanvas.jpg');;
-        } else if(e.target.innerText == 'DATA') {
-            let data = split(stepsInstructions, ' ');
+        } else if(e.target.innerText == 'DAT') {
+            var combined = NR_PINS + ',' + stepsInstructions;
+            let data = split(combined, ' ');
+            
             saveStrings(data, `${Date.now()}.txt`)
         }
     })
     state = 0;
     editPage = new editPicturePage();
     genrPage = new generatePage();
-    canWidth=adaptWidth-a;
-    canHeight=adaptHeight-(screen.height-windowHeight);
+    document.getElementById('bodyContainer').style.visibility = 'visible';
 }
 function draw() {
     if(state == 0) {
         this.step01.style.pointerEvents = 'auto';
         this.step01.style.opacity=1;
         this.step02.style.pointerEvents = 'none';
-        this.step02.style.opacity=0.2;
+        this.step02.style.opacity=0;
         editPage.draw();
     } else if (state == 1) {
         this.step01.style.pointerEvents = 'none';
-        this.step01.style.opacity=0.2;
+        this.step01.style.opacity=0;
         this.step02.style.pointerEvents = 'auto';
         this.step02.style.opacity=1;
         genrPage.draw();

@@ -5,48 +5,15 @@ var fileName='';
 class generatePage {
     constructor() {
         this.state = 0;
+        this.doneUIShown = false;
+        this.savedTxtOnce = false;
+        this.manualBtnRect = null;
+        this.machineBtnRect = null;
         
         this.imgorstring=document.getElementById('imgorstring');
         this.balanceScreen = document.getElementById('balanceScreen');
         this.remakeArt = document.getElementById('remakeArt');
-        this.fcolorScreen = document.getElementById('fcolorScreen');
-        this.balanceCover = document.getElementById('balanceCover');
-        Array.from(this.fcolorScreen.children).forEach(
-            v => v.style.backgroundColor=v.id
-        )
-        this.fcolorScreen.addEventListener('click', e => {
-            var clicked = false;
-            Array.from(this.fcolorScreen.children).forEach(
-                v => {
-                    if(v == e.target) {
-                        clicked=true;
-                        fColor=v.id;
-                    }
-                }
-            )
-            if(clicked) {
-                bredraw = true;
-            }
-        })
-        this.pcoverScreen=document.getElementById('pcoverScreen');
-        Array.from(this.pcoverScreen.children).forEach(
-            v => v.style.backgroundColor=v.id
-        )
-        this.pcoverScreen.addEventListener('click', (e) => {
-            var clicked = false;
-            Array.from(this.pcoverScreen.children).forEach(
-                v => {
-                    if(v == e.target) {
-                        clicked=true;
-                        if(v.id == "nocover") pinCoverUse=false;
-                        else {pinCoverUse = true;cColor=v.id;}
-                    }
-                }
-            )
-            if(clicked) {
-                bredraw = true;
-            }
-        })
+        this.balanceScreen.style.opacity="0";
         this.imgorstring.addEventListener('click', e => {
             const clicked = e.target;
             Array.from(this.imgorstring.children).forEach(
@@ -54,12 +21,12 @@ class generatePage {
             )
             if(clicked) {
                 clicked.classList.add('selected');
-                if(clicked.innerText=="IMAGE") {
+                if(clicked.id=="cimg") {
                     sori=true;
-                    this.balanceCover.style.height="0px";
+                    this.balanceScreen.style.opacity="1";
                 } else {
                     sori=false;
-                    this.balanceCover.style.height=`${document.getElementById('colorBalance').getBoundingClientRect().height}px`;
+                    this.balanceScreen.style.opacity="0";
                 }
             }
         })
@@ -84,30 +51,36 @@ class generatePage {
             sori=false;
             beginGenerate();
             isgenerating = true
-
+            this.doneUIShown = false;
+            this.savedTxtOnce = false;
+            this.balanceScreen.style.opacity="0";
             Array.from(this.imgorstring.children).forEach(
                 v => {
-                    if(v.innerText == "IMAGE") {
+                    if(v.id == "cimg") {
                         v.classList.remove('selected')
                     } else {
                         v.classList.add('selected')
-                        this.balanceCover.style.height="65px";
+
                     }
                 }
             )
         })
         this.backToStarted = document.getElementById('backToStarted')
         this.backToStarted.addEventListener('click', e => {
+            sori=false;
+            isgenerating = false;
+            this.doneUIShown = false;
+            this.savedTxtOnce = false;
+            this.balanceScreen.style.opacity="0";
             Array.from(this.imgorstring.children).forEach(
                 v => {
                     v.classList.remove('selected');
                     if(v.innerText=="STRING") v.classList.add('selected');
                 }
             )
-            sori=false;
-            this.balanceCover.style.height=`${document.getElementById('colorBalance').offsetHeight}px`;
             state=0;
-            document.getElementById('makeArt').childNodes[1].innerText = 'Generate';
+            document.getElementById('makeArt').childNodes[1].innerText = 'Gen';
+            document.getElementById('makeArt').style.backgroundColor = 'rgb(255, 255, 255)';
         })
         calcCirclePins();
         lines = Array.apply(null, {
@@ -120,28 +93,97 @@ class generatePage {
                 lines[j * NR_PINS + i] = points
             }
         }
+        var that = this;
         var s1 = function( sketch ) {
             sketch.setup = function() {
                 var a=document.getElementById('toolBar').getBoundingClientRect().width;
-                let canvas1 = sketch.createCanvas(adaptWidth, adaptHeight).parent('sketch-holder').position(a, 0);
-                canvas1.background("rgba(100,100,100,0)");
+                let canvas1 = sketch.createCanvas(adaptWidth, adaptHeight).parent('sketch-holder').position(0, 0);
+                canvas1.background("rgb(255, 255, 255)");
+                canvas1.style.position = 'absolute';
+                canvas1.style.zindex='0';
             }
             sketch.draw = function() {
-              sketch.background("rgba(100,100,100,0.0)");
+              sketch.background("rgb(255, 255, 255)");
               sketch.imageMode(CENTER);
               if(sori) {
                 sketch.image(newColorImg,canWidth/2, canHeight/2, newColorImg.width, newColorImg.height);
               } else {
                 sketch.clear();
               }
+              // draw progress bar overlay only during generation
+              if (typeof isgenerating !== 'undefined' && isgenerating) {
+                var progress = (typeof NumberOfStroke !== 'undefined' && NumberOfStroke > 0)
+                  ? generateOrder / NumberOfStroke
+                  : 0;
+                var barY = canHeight * 0.15;
+                var barH = canHeight * 0.05;
+                sketch.noStroke();
+                
+                sketch.fill(135, 206, 235, 128); // skyblue with ~0.5 alpha
+                if(devMode == 0) {
+                    sketch.rect(0, barY, canWidth * progress, barH);
+                } else {
+                    sketch.rect(0, 0, canWidth * progress, barH);
+                }
+              }
+              
+              // draw done buttons after generation completes
+              if (that.doneUIShown) {
+                var btnW = canWidth * 0.25;
+                var btnH = canHeight * 0.05;
+                var gap = canWidth * 0.03;
+                var totalW = btnW * 2 + gap;
+                var startX = (canWidth - totalW) / 2;
+                var barY = canHeight * 0.15;
+                var y = (devMode == 0) ? barY : 0;
+                sketch.noStroke();
+                sketch.fill(135, 206, 235, 128);
+                // left button
+                sketch.rect(startX, y, btnW, btnH);
+                // right button
+                sketch.rect(startX + btnW + gap, y, btnW, btnH);
+
+                // cache button rects for click detection
+                that.manualBtnRect = { x: startX, y: y, w: btnW, h: btnH };
+                that.machineBtnRect = { x: startX + btnW + gap, y: y, w: btnW, h: btnH };
+
+                // labels
+                sketch.fill(0);
+                sketch.textAlign(sketch.CENTER, sketch.CENTER);
+                sketch.textSize(Math.max(12, btnH * 0.5));
+                sketch.text('MANUAL', startX + btnW / 2, y + btnH / 2);
+                sketch.text('MACHINE', startX + btnW + gap + btnW / 2, y + btnH / 2);
+              }
+                
             }
-          }
-          new p5(s1);
+            sketch.mousePressed = function() {
+              if (!that.doneUIShown) return;
+              var mx = sketch.mouseX;
+              var my = sketch.mouseY;
+              function inRect(r){ return r && mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h; }
+              if (inRect(that.manualBtnRect) || inRect(that.machineBtnRect)) {
+                if (!that.savedTxtOnce) {
+                  var combined = NR_PINS + ',' + stepsInstructions;
+                  try { localStorage.setItem('data', combined); } catch(e) {}
+                  // save txt via p5 instance API
+                  try { sketch.saveStrings([combined], `${Date.now()}.txt`); } catch(e) {}
+                  that.savedTxtOnce = true;
+                }
+                if (inRect(that.manualBtnRect)) {
+                  // go to manual viewer which auto-loads from localStorage
+                  window.location.href = 'indexmanual.html';
+                } else {
+                  // MACHINE: remain on page for now; further action will be defined later
+                }
+              }
+            }
+        }
+        new p5(s1);
     }
     draw() {
-        this.balanceCover.style.top = `${document.getElementById('colorBalance').getBoundingClientRect().top}px`;
-        if(!sori) this.balanceCover.style.height=`${document.getElementById('colorBalance').offsetHeight}px`;
-        else this.balanceCover.style.height = '0px';
+        // this.balanceCover.style.top = `${document.getElementById('colorBalance').getBoundingClientRect().top}px`;
+        // if(!sori) this.balanceCover.style.height=`${document.getElementById('colorBalance').offsetHeight}px`;
+        // else this.balanceCover.style.height = '0px';
         cursor(ARROW);
         if (bredraw) {
             framedrawPins(NR_PINS);
@@ -151,7 +193,7 @@ class generatePage {
             if (generateOrder == 0) {
                 
                 clearStrings();
-                background(100);
+                background(255);
                 framedrawPins(NR_PINS);
                 noStroke();
                 fill(255);
@@ -184,6 +226,9 @@ class generatePage {
             if (generateOrder == NumberOfStroke) {
                 isgenerating = false;
                 document.getElementById('makeArt').childNodes[1].innerText = 'Done'
+                if (!this.doneUIShown) {
+                    this.doneUIShown = true;
+                }
                 //fileName = `${Date.now()}`;
                 //var imgfile = get(canWidth/2-SIZE/2-50, canHeight/2-SIZE/2-50, SIZE+100, SIZE+100);
                 // imgfile.loadPixels();

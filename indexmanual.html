@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>jwwoong</title>
+	<style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* 스크롤바도 제거 */
+    }
+    canvas {
+      display: block;  /* inline 간격 제거 */
+    }
+  </style>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+	<link type="text/css" rel="stylesheet" href="main.css">
+	<link type="text/css" rel="stylesheet" href="indexmanual.css">
+	<script src="receive.js"></script>
+</head>
+
+<body>
+	    <button id="openFileBtn" style="position:fixed;top:16px;left:16px;z-index:1000;">Open File</button>
+		<span id="dataInfo" style="position:fixed;color:black;top:16px;left:110px;z-index:9999;background:#fff;padding:2px 8px;border-radius:4px;pointer-events:none;">-</span>
+		<button id="regenBtn" onclick="location.href='indexstringart.html'" style="position:fixed;top:16px;left:300px;z-index:1000;">Regen</button>
+		<input type="file" id="fileInput" accept=".txt" style="display:none;" />
+		<input
+			type="range"
+			id="strokesSlider"
+			min="0"
+			max="0"
+			value="0"
+			style="position:fixed;top:56px;left:16px;z-index:1000;width:calc(100vw - 32px);"
+    	/>
+		<div id="strokeLabelBar" style="position:relative;">
+			<div id="strokeLabelsViewport" style="overflow:hidden;width:100%;height:100%;">
+				<div id="strokeLabelsTrack" style="display:flex;align-items:stretch;transform:translateX(0);margin-top:20px;">
+					<div id="prevLabel" class="preBtn" style="flex:0 0 33.3333%;display:flex;align-items:center;justify-content:center;">0</div>
+					<div id="curLabel" style="
+						display:flex;
+						flex-direction:column;
+						align-items:center;
+						justify-content:center;
+						color:#000;
+						text-align:center;
+						align-items:center;
+						background:transparent;
+						font-size:2em;
+						height:100%;
+						user-select:none;
+						flex:0 0 33.3333%;
+					">0                    
+					</div>
+					<div id="nextLabel" style="
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						text-align:center;
+						color:#000;
+						background:transparent;
+						font-size:1em;
+						height:100%;
+						user-select:none;
+						flex:0 0 33.3333%;
+					">0</div>
+					<div id="afterLabel" style="flex:0 0 33.3333%;display:flex;align-items:center;justify-content:center;text-align:center;color:#000;background:transparent;font-size:1em;height:100%;user-select:none;">0</div>
+				</div>
+			</div>
+			<div id="strokeLabelCaptions" style="position:absolute;inset:0;display:flex;pointer-events:none;">
+				<div style="flex:0 0 33.3333%;display:flex;align-items:flex-start;justify-content:center;color:#555;">pre</div>
+				<div style="flex:0 0 33.3333%;display:flex;align-items:flex-start;justify-content:center;color:#555;">now</div>
+				<div style="flex:0 0 33.3333%;display:flex;align-items:flex-start;justify-content:center;color:#555;">next</div>
+			</div>
+		</div>
+		<!-- <span id="strokesValue" style="position:fixed;top:56px;left:calc(16px + 100vw - 80px);z-index:1001;background:#fff;padding:2px 8px;border-radius:4px;"></span>-->
+		<div class="touchBtn" id="touchBtn"></div>
+
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "./build/three.module.js",
+					"three/addons/": "./jsm/"
+				}
+			}
+		</script>
+	<script src="build/ammo.js"></script>
+	<script type="module">
+		function setInfo(pinCount, seqLen) {
+			const info = document.getElementById('dataInfo');
+			info.textContent = `pins: ${pinCount}, seq: ${seqLen}`;
+		}
+		function tryLoadFromLocalStorage() {
+			const stored = localStorage.getItem('data');
+			if (!stored || stored.length === 0) return false;
+			try {
+				const parts = stored.split(',').map(Number);
+				if (!parts.length) return false;
+				cdiv = parseInt(parts[0]);
+				const seq = parts.slice(1);
+				pdata = [0, ...seq, 0];
+				setInfo(cdiv, seq.length);
+				array02 = []; array03 = [];
+				const d = 2 * Math.PI / cdiv;
+				for (let i = 0; i < cdiv; i++) {
+					array02.push([(a + c * Math.cos(i * d)) - a, (b + c * Math.sin(i * d)) - a]);
+					array03.push([(a + s + (c + s) * Math.cos(i * d)), (b + s + (c + s) * Math.sin(i * d))]);
+				}
+				if (typeof Ammo === 'function') { Ammo().then(start); }
+				else if (typeof Ammo === 'object' && Ammo.then) { Ammo.then(start); }
+				else { start(); }
+				strokesSlider.max = pdata.length;
+				strokesSlider.value = 0;
+				document.getElementById('curLabel').innerHTML = '0';
+				document.getElementById('prevLabel').innerHTML = '0';
+				document.getElementById('nextLabel').innerHTML = '' + (pdata[0] ?? 0);
+				return true;
+			} catch(e) { return false; }
+		}
+		window.addEventListener('DOMContentLoaded', function(){
+			tryLoadFromLocalStorage();
+		});
+		import * as THREE from 'three';
+		import Stats from 'three/addons/libs/stats.module.js';
+		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+		import WebGL from 'three/addons/capabilities/WebGL.js';
+		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+		import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+		import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+		import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+		import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
+		import { Line2 } from 'three/addons/lines/Line2.js';
+		import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+		import * as GeometryUtils from 'three/addons/utils/GeometryUtils.js';
+		import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+		let pdata = [];
+		let cdiv;
+		let array02 = []//핀위치데이터
+		let array03 = []//스티커위치
+		const userAgent = navigator.userAgent;
+		var tcirclesize = 97
+		if (/Mobi|Android|iPhone|iPad/i.test(userAgent)) {
+        // 모바일 기기일 경우
+		var tcirclesize = 97;
+		} else {
+			// PC일 경우
+			var tcirclesize = 130;
+		}
+		
+		var s = 5;
+		var a = tcirclesize
+		var b = tcirclesize
+		var c = tcirclesize
+		let animationId = null;
+        document.getElementById('openFileBtn').addEventListener('click', function() {
+			  // 모든 데이터와 three.js 객체 초기화
+			if (animationId) {
+				cancelAnimationFrame(animationId);
+				animationId = null;
+			}
+			if (scene) {
+				// 씬에서 모든 오브젝트 제거
+				while (scene.children.length > 0) {
+					const object = scene.children[0];
+					scene.remove(object);
+					if (object.geometry) object.geometry.dispose();
+					if (object.material) {
+						if (Array.isArray(object.material)) {
+							object.material.forEach(material => material.dispose());
+						} else {
+							object.material.dispose();
+						}
+					}
+				}
+			}
+			// 배열, 변수 초기화
+			pdata = [];
+			array02 = [];
+			array03 = [];
+			k = 0;
+			params.strokesNumber = 0;
+			strokesSlider.value = 0;
+			document.getElementById('curLabel').innerHTML = '0';
+			document.getElementById('prevLabel').innerHTML = '0';
+			document.getElementById('nextLabel').innerHTML = '0';
+			//strokesValue.textContent = 0;
+
+			// line, arrowLine 등 전역 객체 초기화
+			line = null;
+			window.arrowLine = null;
+			lineSegments = null;
+			stickerGroup = null;
+			frameAll = null;
+			if (arrowLabelText) {
+				scene.remove(arrowLabelText);
+				arrowLabelText.traverse(function (child) {
+					if (child.isMesh) {
+						child.geometry.dispose();
+						child.material.dispose();
+					}
+				});
+				arrowLabelText = null;
+			}
+			   // renderer 초기화 (필요시)
+		    if (renderer && renderer.domElement) {
+		        renderer.domElement.parentNode.removeChild(renderer.domElement);
+				renderer.dispose();
+		        renderer = null;
+		    }
+            document.getElementById('fileInput').click();
+
+        });
+
+        // 파일 선택 시 파일 읽어서 콘솔에 출력
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file && file.name.endsWith('.txt')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // 파일 내용 e.target.result
+                    const fileContent = e.target.result.trim();
+					pdata = fileContent.split(',').map(Number);
+					console.log('새로운 pdata:', pdata);
+ 					cdiv =parseInt(pdata[0]);
+					pdata.shift();
+					console.log(cdiv);
+					pdata.unshift(0);
+					console.log(pdata);
+					pdata.push(0);
+					console.log(pdata);
+					setInfo(cdiv, pdata.length - 2);
+					var d = 2 * Math.PI / cdiv;
+					for (var i = 0; i < cdiv; i++) {
+						array02.push([(a + c * Math.cos(i * d)) - a, (b + c * Math.sin(i * d)) - a])
+						array03.push([(a + s + (c + s) * Math.cos(i * d)), (b + s + (c + s) * Math.sin(i * d))])
+					}
+					if (typeof Ammo === 'function') {
+						Ammo().then(start);
+					} else if (typeof Ammo === 'object' && Ammo.then) {
+						Ammo.then(start);
+					} else {
+						start();
+					}
+                };
+                reader.readAsText(file, 'utf-8');
+            } else {
+                alert('Only .txt files can be selected.');
+            }
+        });
+		var k = 0;
+		var text;
+		let lineSegments, lastlineSegment;
+		let gui, lineMaterial,lastlineMaterial;
+		let matLine;
+		let line1;
+		let camera, scene, renderer, controls;
+		let frameAll, lastLineG;
+		let stickerGroup;
+		let font;
+		let arrowLabelText;
+		var params = {
+			strokesNumber: 0,
+			speedValue: 0,
+			startArt: false,
+		};
+		const aspect = window.innerWidth / window.innerHeight;
+		const frustumSize = 400; // 보여줄 씬의 크기 (원하는 값으로 조정)
+		let line = null;
+		const strokesSlider = document.getElementById('strokesSlider');
+		strokesSlider.addEventListener('input', function () {
+            params.strokesNumber = parseInt(strokesSlider.value, 10);
+            document.getElementById('curLabel').textContent = (pdata[params.strokesNumber-2] ?? 0);
+            document.getElementById('prevLabel').textContent = (pdata[params.strokesNumber - 3] ?? 0);
+            document.getElementById('nextLabel').textContent = (pdata[params.strokesNumber-1] ?? 0);
+        });
+		document.getElementById('prevLabel').addEventListener('pointerdown', function () {
+			if (params.strokesNumber === undefined || params.strokesNumber <= 0) return;
+			const beforePrev = pdata[params.strokesNumber - 2] ?? 0;
+			const prev = pdata[params.strokesNumber - 1] ?? 0;
+			const cur = pdata[params.strokesNumber] ?? 0;
+			const next = pdata[params.strokesNumber + 1] ?? 0;
+			const track = document.getElementById('strokeLabelsTrack');
+			const prevLabel = document.getElementById('prevLabel');
+			const curLabel = document.getElementById('curLabel');
+			const nextLabel = document.getElementById('nextLabel');
+			const afterLabel = document.getElementById('afterLabel');
+			// afterLabel.textContent = next;
+			// nextLabel.textContent = cur;
+			// curLabel.textContent = prev;
+			prevLabel.textContent = beforePrev;
+			track.style.transition = 'transform 200ms ease';
+			track.style.transform = 'translateX(33.3333%)';
+			track.addEventListener('transitionend', function handler(){
+				track.removeEventListener('transitionend', handler);
+				params.strokesNumber--;
+				if (params.strokesNumber < 0) params.strokesNumber = 0;
+				strokesSlider.value = params.strokesNumber;
+				track.style.transition = 'none';
+				track.style.transform = 'translateX(0)';
+				prevLabel.textContent = (pdata[params.strokesNumber-2] ?? 0);
+				curLabel.textContent = (pdata[params.strokesNumber-1] ?? 0);
+				nextLabel.textContent = (pdata[params.strokesNumber] ?? 0);
+				afterLabel.textContent = (pdata[params.strokesNumber+1] ?? 0);
+			}, { once: true });
+		});
+		function resizeTouchBtn() {
+            const touchBtn = document.getElementById('touchBtn');
+            const fileBtn = document.getElementById('openFileBtn');
+            const slider = document.getElementById('strokesSlider');
+			const labelbar = document.getElementById('strokeLabelBar');
+            // 실제 높이 가져오기
+            const fileBtnRect = fileBtn.getBoundingClientRect();
+            const sliderRect = slider.getBoundingClientRect();
+
+            // 슬라이더 아래쪽 기준(top)
+            const topOffset = Math.max(fileBtnRect.bottom, sliderRect.bottom);
+
+            labelbar.style.top = topOffset + 'px';
+			touchBtn.style.top = topOffset + 'px';
+            touchBtn.style.width = window.innerWidth + 'px';
+            touchBtn.style.height = (window.innerHeight - topOffset) + 'px';
+
+			// 아래 사용 가능 영역(라벨바 아래부터 화면 하단까지)에 맞춰 캔버스 크기/위치 조정
+			const availH = window.innerHeight - topOffset;
+			if (typeof renderer !== 'undefined' && renderer && renderer.domElement) {
+				renderer.setSize(window.innerWidth, availH);
+				const canvas = renderer.domElement;
+				canvas.style.position = 'absolute';
+				canvas.style.left = '0px';
+				canvas.style.top = topOffset + 'px';
+			}
+			// 직교 카메라 종횡비 갱신
+			if (typeof camera !== 'undefined' && camera) {
+				const aspectNow = window.innerWidth / Math.max(1, availH);
+				camera.left = -frustumSize * aspectNow / 2;
+				camera.right =  frustumSize * aspectNow / 2;
+				camera.top =  frustumSize / 2;
+				camera.bottom = -frustumSize / 2;
+				camera.updateProjectionMatrix();
+			}
+			// 선 머티리얼 해상도 보정 (굵기 유지)
+			if (typeof matLine !== 'undefined' && matLine && matLine.resolution) {
+				matLine.resolution.set(window.innerWidth, availH);
+			}
+			if (window.arrowLine && window.arrowLine.material && window.arrowLine.material.resolution) {
+				window.arrowLine.material.resolution.set(window.innerWidth, availH);
+			}
+        }
+        window.addEventListener('resize', resizeTouchBtn);
+        window.addEventListener('orientationchange', resizeTouchBtn);
+        // DOM이 모두 렌더링된 후 실행
+        window.addEventListener('DOMContentLoaded', resizeTouchBtn);
+
+        // 터치/클릭 이벤트: strokesNumber 증가 (animated)
+        document.getElementById('touchBtn').addEventListener('pointerdown', function () {
+            if (params.strokesNumber === undefined) return;
+            const prev = pdata[params.strokesNumber - 2] ?? 0;
+            const cur = pdata[params.strokesNumber-1] ?? 0;
+            const next = pdata[params.strokesNumber] ?? 0;
+            const after = pdata[params.strokesNumber + 1] ?? 0;
+            const track = document.getElementById('strokeLabelsTrack');
+            const prevLabel = document.getElementById('prevLabel');
+            const curLabel = document.getElementById('curLabel');
+            const nextLabel = document.getElementById('nextLabel');
+            const afterLabel = document.getElementById('afterLabel');
+            // prevLabel.textContent = prev;
+            // curLabel.textContent = cur;
+            // nextLabel.textContent = next;
+            // afterLabel.textContent = after;
+            track.style.transition = 'transform 200ms ease';
+            track.style.transform = 'translateX(-33.3333%)';
+            track.addEventListener('transitionend', function handler(){
+                track.removeEventListener('transitionend', handler);
+                params.strokesNumber++;
+                if (params.strokesNumber > strokesSlider.max) params.strokesNumber = strokesSlider.max;
+                strokesSlider.value = params.strokesNumber;
+                track.style.transition = 'none';
+                track.style.transform = 'translateX(0)';
+                prevLabel.textContent = (pdata[params.strokesNumber-2] ?? 0);
+                curLabel.textContent = (pdata[params.strokesNumber-1] ?? 0);
+                nextLabel.textContent = (pdata[params.strokesNumber] ?? 0);
+                afterLabel.textContent = (pdata[params.strokesNumber+1] ?? 0);
+            }, { once: true });
+        });
+		function start() {
+			init();
+			animate();
+		}
+		function init() {
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color(0xFFFFFF);
+			camera = new THREE.OrthographicCamera(
+			-frustumSize * aspect / 2, // left
+			frustumSize * aspect / 2, // right
+			frustumSize / 2,          // top
+			-frustumSize / 2,          // bottom
+			0.000001,                      // near
+			1000                      // far
+			);
+			camera.position.set(0, 200, 0);   // x=0, y=위에서, z=0
+			camera.up.set(0, 0, -1);          // 위쪽 방향을 -Z축으로 설정 (탑뷰시 필요)
+			camera.lookAt(0, 0, 0);           // 씬의 정가운데를 바라보게 설정
+			{//sticker of pins number 
+				const loader = new FontLoader();
+				stickerGroup = new THREE.Group();
+				loader.load('fonts/helvetiker_regular.typeface.json', function (loadedFont) {
+					font = loadedFont;
+					const color = 0x000000;
+					const matDark = new THREE.LineBasicMaterial({
+						color: color,
+						side: THREE.DoubleSide
+					});
+					const matLite = new THREE.MeshBasicMaterial({
+						color: color,
+						transparent: true,
+						opacity: 0.4,
+						side: THREE.DoubleSide
+					});
+					for (var i = 0; i < cdiv; i++) {
+						var message = "-";
+						if(i%40==0){
+						var message = i.toString()+"-";
+						}
+						var shapes = font.generateShapes(message.padStart(3, " "), 4);
+						var geometry = new THREE.ShapeGeometry(shapes);
+						geometry.rotateX(-Math.PI / 2)
+						geometry.rotateY(Math.PI - (Math.PI * i / (cdiv / 2)));
+						text = new THREE.Mesh(geometry, matLite);
+						text.geometry.center();
+						// text.geometry.computeBoundingBox();
+						// text.geometry.translate(-text.geometry.boundingBox.min.x, 0, 0);
+						text.position.set(array03[i][0] , 109.5, array03[i][1] )
+						stickerGroup.add(text);
+						
+						
+					}
+					stickerGroup.position.set(-tcirclesize-s, 0, -tcirclesize-s)
+					//stickerGroup.rotateY(-Math.PI / 120)
+				})
+			}
+			scene.add(stickerGroup);
+
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.shadowMap.enabled = true;
+			renderer.toneMapping = THREE.ReinhardToneMapping;
+			document.body.appendChild(renderer.domElement);
+			// 캔버스를 라벨바 아래 영역에 맞춤
+			resizeTouchBtn();
+			{//group of frame's parts
+				frameAll = new THREE.Group();
+				const lineGeometry = new THREE.BufferGeometry();
+				lineGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pdata.length * 2 * 3), 3));
+				lineGeometry.computeBoundingSphere();
+				lineMaterial = new THREE.LineBasicMaterial({
+					color: 0x444444,
+					transparent: true,
+					opacity: 0.1
+				});
+				lineSegments = new THREE.LineSegments(lineGeometry, lineMaterial);
+				//lineSegments.rotation.z=-Math.PI / 120
+				//frameAll.add(lineSegments);
+				lineSegments.rotateX(-Math.PI / 2);
+				scene.add(lineSegments)
+			}
+			const geometry = new LineGeometry();
+			geometry.setPositions( [0, 0, 0, 10, 10, 10] );
+			
+			//geometry.setColors( [255,0,0,255,0,0] );
+
+			matLine = new LineMaterial({
+				color: 0xff0000,
+				vertexColors: false,
+				linewidth: 5, // 픽셀 단위
+				dashed: false,
+				alphaToCoverage: false,
+				transparent: false,
+				opacity: 1
+			});
+			matLine.resolution.set(window.innerWidth, window.innerHeight); // 반드시 설정!
+
+			line = new Line2( geometry, matLine );
+			//line.rotation.z = -Math.PI / 120;
+			line.rotateX(-Math.PI / 2);
+			line.computeLineDistances();
+			line.scale.set( 1, 1, 1 );
+			
+			scene.add( line );
+			line.visible = false;
+			{//OrbitControl
+				controls = new OrbitControls(camera, renderer.domElement);
+				controls.update();
+			}
+			strokesSlider.max = pdata.length;
+            strokesSlider.value = params.strokesNumber;
+		}
+		function updateStrokes() {
+			if (!pdata || pdata.length === 0 || !array02 || array02.length === 0) {
+        		return; // pdata 또는 array02가 비어 있으면 함수를 종료
+    		}
+			var strokesCount = params.strokesNumber;
+			k=strokesCount;
+			let lineNum = 0;
+			const posS = new THREE.Vector3();
+			const posE = new THREE.Vector3();
+			let strokegap = 1.2;
+			if(k > 0) {
+				for (let i = 0; i < strokesCount-1 ; i++) {
+					//if (i % 200 == 0) strokegap += 0.2;
+					const indexS = pdata[i];
+					const indexE = pdata[i+1];
+					if(indexS >= array02.length || indexE >= array02.length) continue;
+
+					posS.set(array02[indexS][0], -array02[indexS][1], 108 + strokegap);
+					posE.set(array02[indexE][0], -array02[indexE][1], 108 + strokegap);
+					
+					lineSegments.geometry.attributes.position.setXYZ(lineNum++, posS.x, posS.y, posS.z);
+					lineSegments.geometry.attributes.position.setXYZ(lineNum++, posE.x, posE.y, posE.z);
+				}
+				if (strokesCount > 1) {
+					const indexS = pdata[strokesCount - 2];
+					const indexE = pdata[strokesCount - 1];
+
+					if (indexS >= array02.length || indexE >= array02.length) {
+						line.visible = false;
+						if (window.arrowLine) window.arrowLine.visible = false;
+						if (arrowLabelText) arrowLabelText.visible = false;
+					} else {
+						line.visible = true;
+						posS.set(array02[indexS][0], -array02[indexS][1], 108 + strokegap);
+						posE.set(array02[indexE][0], -array02[indexE][1], 108 + strokegap);
+						line.geometry.setPositions([
+							posS.x, posS.y, posS.z+5,
+							posE.x, posE.y, posE.z+5
+						]);
+					// 화살표(삼각형) 선으로 그리기
+						if (!window.arrowLine) {
+							const arrowGeometry = new LineGeometry();
+							arrowGeometry.setColors( [255,0,0,255,0,0,255,0,0,255,0,0,255,0,0,255,0,0] );
+							arrowGeometry.setPositions([0,0,0, 0,0,0, 0,0,0, 0,0,0]); // 3개 꼭짓점 + 닫기
+							window.arrowLine = new Line2(arrowGeometry, matLine.clone());
+							//window.arrowLine.rotation.z = -Math.PI / 120;
+							window.arrowLine.rotateX(-Math.PI / 2);
+							scene.add(window.arrowLine);
+						}
+							// 방향 벡터 계산
+						const dir = new THREE.Vector3().subVectors(posE, posS).normalize();
+						const arrowLength = 12; // 선 굵기에 맞게 조절
+						const arrowWidth = 3;   // 선 굵기에 맞게 조절
+	
+						const tip = posE.clone();
+						const base = posE.clone().addScaledVector(dir, -arrowLength);
+						const perp = new THREE.Vector3(-dir.y, dir.x, 0).normalize().multiplyScalar(arrowWidth);
+	
+						const v0 = tip;
+						const v1 = base.clone().add(perp);
+						const v2 = base.clone().add(perp.negate());
+							// 꼭짓점 3개 + tip으로 닫기
+						window.arrowLine.geometry.setPositions([
+							v0.x, v0.y, v0.z+5,
+							v1.x, v1.y, v1.z+5,
+							v2.x, v2.y, v2.z+5,
+							v0.x, v0.y, v0.z+5
+						]);
+						window.arrowLine.material.linewidth = matLine.linewidth; // 굵기 맞추기
+						window.arrowLine.material.vertexColors=false;
+						window.arrowLine.material.color.set(matLine.color);      // 색상 맞추기
+						window.arrowLine.material.resolution.set(window.innerWidth, window.innerHeight);
+						window.arrowLine.position.set(0, 0, 0);
+						window.arrowLine.visible = true;
+
+							if (font) {
+								if (!arrowLabelText) {
+									arrowLabelText = new THREE.Group();
+									scene.add(arrowLabelText);
+								} else {
+									while (arrowLabelText.children.length > 0) {
+										const child = arrowLabelText.children[0];
+										arrowLabelText.remove(child);
+										if (child.geometry) child.geometry.dispose();
+										if (child.material) child.material.dispose();
+									}
+								}
+
+								const labelNumber = pdata[strokesCount - 1];
+								const shapes = font.generateShapes(labelNumber.toString(), 10);
+
+								const fillColor = new THREE.Color(0xFFFF00);
+								const strokeColor = new THREE.Color(0x000000);
+
+								const matLite = new THREE.MeshBasicMaterial({
+									color: fillColor,
+									side: THREE.DoubleSide,
+									toneMapped: false
+								});
+
+								const matDark = new THREE.MeshBasicMaterial({
+									color: strokeColor,
+									side: THREE.DoubleSide
+								});
+
+								const geometry = new THREE.ShapeGeometry(shapes);
+								geometry.computeBoundingBox();
+								const xMid = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+								geometry.translate(xMid, 0, 0);
+
+								const textMesh = new THREE.Mesh(geometry, matLite);
+								textMesh.position.z = 1;
+								arrowLabelText.add(textMesh);
+
+								const holeShapes = [];
+								for (let i = 0; i < shapes.length; i++) {
+									const shape = shapes[i];
+									if (shape.holes && shape.holes.length > 0) {
+										for (let j = 0; j < shape.holes.length; j++) {
+											const hole = shape.holes[j];
+											holeShapes.push(hole);
+										}
+									}
+								}
+								shapes.push(...holeShapes);
+
+								const style = SVGLoader.getStrokeStyle(3, strokeColor.getStyle());
+								const strokeText = new THREE.Group();
+
+								for (let i = 0; i < shapes.length; i++) {
+									const shape = shapes[i];
+									const points = shape.getPoints();
+									const strokeGeometry = SVGLoader.pointsToStroke(points, style);
+									strokeGeometry.translate(xMid, 0, 0);
+									const strokeMesh = new THREE.Mesh(strokeGeometry, matDark);
+									strokeText.add(strokeMesh);
+								}
+								arrowLabelText.add(strokeText);
+
+								const textOffset = arrowLength+15;
+								const textPosition = posE.clone().addScaledVector(dir, -textOffset);
+								arrowLabelText.position.set(textPosition.x, posE.z + 6, -textPosition.y);
+								arrowLabelText.visible = true;
+							}
+					}
+				} else {
+					line.visible = false;
+					if (window.arrowLine) window.arrowLine.visible = false;
+					if (arrowLabelText) arrowLabelText.visible = false;
+				}
+			} else {
+				line.visible = false;
+				if (window.arrowLine) window.arrowLine.visible = false;
+				if (arrowLabelText) arrowLabelText.visible = false;
+			}
+			lineSegments.geometry.setDrawRange(0, lineNum);
+			lineSegments.position.set(0, 0, 0);
+			line.position.set(0, 0, 0);
+			lineSegments.geometry.attributes.position.needsUpdate = true;
+			line.geometry.attributes.position.needsUpdate = true;
+			
+		}
+		
+		function animate() {
+			animationId = requestAnimationFrame(animate);
+			if (pdata && pdata.length > 0) {
+				updateStrokes();
+			}
+			if (arrowLabelText) {
+				arrowLabelText.quaternion.copy(camera.quaternion);
+			}
+			controls.update();
+			render();
+			
+		}
+		function render() {
+			if (renderer) {
+				renderer.render(scene, camera);
+			}
+		}
+	</script>
+</body>
+
+</html>
