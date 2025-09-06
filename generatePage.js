@@ -173,7 +173,7 @@ class generatePage {
                   // go to manual viewer which auto-loads from localStorage
                   window.location.href = 'indexmanual.html';
                 } else {
-                  // MACHINE: remain on page for now; further action will be defined later
+                    window.location.href = 'indexbattle.html';
                 }
               }
             }
