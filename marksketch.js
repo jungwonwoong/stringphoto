@@ -185,11 +185,11 @@ function drawConnectionStatus() {
     
     if (markConnected) {
         fill(0, 150, 0);
-        text('MARK 연결됨', statusX, statusY);
+        text('BATTLE 연결됨', statusX, statusY);
         fill(0, 150, 0);
     } else {
         fill(150, 0, 0);
-        text('MARK 연결 안됨', windowWidth*0.15, statusY);
+        text('BATTLE 연결 안됨', windowWidth*0.15, statusY);
         fill(150, 0, 0);
     }
 

@@ -136,11 +136,16 @@
         }
       });
 
-      // homemade 모드 활성화
+      // handmade: 시퀀스 파일이 있으면 데이터를 localStorage로 넘기고 indexmanual.html로 이동
       document.getElementById('handmade-btn').addEventListener('click', function() {
-        console.log('handmade 버튼 클릭됨');
-        document.getElementById('homemade-left').style.display = 'block';
-        document.getElementById('homemade-right').style.display = 'block';
+        try {
+          if (window.sequenceNumbers && Array.isArray(window.sequenceNumbers) && window.sequenceNumbers.length > 0) {
+            var pinCount = (typeof window.Pins === 'number' && window.Pins > 0) ? window.Pins : 320;
+            var combined = pinCount + ',' + window.sequenceNumbers.join(',');
+            try { localStorage.setItem('data', combined); } catch(e) {}
+          }
+        } catch (e) { /* ignore */ }
+        window.location.href = 'indexmanual.html';
       });
 
       // homemade 왼쪽/오른쪽 버튼 이벤트
