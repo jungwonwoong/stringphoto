@@ -185,11 +185,11 @@ function drawConnectionStatus() {
     
     if (markConnected) {
         fill(0, 150, 0);
-        text('MARK 연결됨', statusX, statusY);
+        text('BATTLE 연결됨', statusX, statusY);
         fill(0, 150, 0);
     } else {
         fill(150, 0, 0);
-        text('MARK 연결 안됨', windowWidth*0.15, statusY);
+        text('BATTLE 연결 안됨', windowWidth*0.15, statusY);
         fill(150, 0, 0);
     }
 
@@ -284,7 +284,7 @@ function startMark() {
 function pauseMark() {
     if (markRunning) {
         markPaused = !markPaused;
-        console.log(markPaused ? 'MARK 일시정지됨' : 'MARK 재개됨');
+        console.log(markPaused ? 'BATTLE 일시정지됨' : 'BATTLE 재개됨');
         
         // 버튼 텍스트 업데이트
         const pauseBtn = document.getElementById('pause-btn');
@@ -303,7 +303,7 @@ function stopMark() {
     markRunning = false;
     markPaused = false;
     currentSequenceIndex = 0;
-    console.log('MARK 정지됨');
+    console.log('BATTLE 정지됨');
     updateDisplay();
 }
 
@@ -312,7 +312,7 @@ function resetMark() {
     markPaused = false;
     currentSequenceIndex = 0;
     sequenceNumbers = [];
-    console.log('MARK 리셋됨');
+    console.log('BATTLE 리셋됨');
     updateDisplay();
 }
 
