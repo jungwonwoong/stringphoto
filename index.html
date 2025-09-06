@@ -60,34 +60,82 @@
       cursor: pointer;
       box-shadow: 0 2px 8px rgba(108,99,255,0.08);
       transition: background 0.2s;
-      margin: 8px;
     }
     .main-action button:hover {
       background: #554ee0;
     }
-    .main-action button.orange {
-      background: #ffb347;
+    .guestbook {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      padding: 24px 20px 16px 20px;
+      margin-bottom: 32px;
     }
-    .main-action button.orange:hover {
-      background: #ffa500;
+    .guestbook-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #6c63ff;
     }
-    .main-action button.green {
-      background: #4CAF50;
+    .guestbook-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
     }
-    .main-action button.green:hover {
-      background: #45a049;
+    .guestbook-form input, .guestbook-form textarea {
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border 0.2s;
     }
-    .main-action button.red {
-      background: #ff4757;
+    .guestbook-form input:focus, .guestbook-form textarea:focus {
+      border: 1.5px solid #6c63ff;
     }
-    .main-action button.red:hover {
-      background: #ff3742;
+    .guestbook-form button {
+      align-self: flex-end;
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.2s;
     }
-    .main-action button.blue {
-      background: #3742fa;
+    .guestbook-form button:hover {
+      background: #554ee0;
     }
-    .main-action button.blue:hover {
-      background: #2f3542;
+    .guestbook-list {
+    }
+    .guestbook-entry {
+      border-bottom: 1px solid #f1f1f1;
+      padding: 8px 0;
+    }
+    .guestbook-entry:last-child {
+      border-bottom: none;
+    }
+    .guestbook-entry .name {
+      font-weight: 700;
+      color: #444;
+      margin-right: 8px;
+    }
+    .guestbook-entry .date {
+      font-size: 0.85em;
+      color: #aaa;
+      margin-left: 6px;
+    }
+    .guestbook-entry .msg {
+      margin-top: 2px;
+      color: #333;
+      white-space: pre-line;
     }
     footer {
       text-align: center;
@@ -100,12 +148,84 @@
       header { flex-direction: column; gap: 8px; padding: 18px 8px 8px 8px; }
       .site-title { font-size: 1.3rem; }
       main { padding: 12px 2px 2px 2px; }
-      .main-action button { 
-        display: block; 
-        width: 100%; 
-        max-width: 300px; 
-        margin: 8px auto; 
-      }
+      .main-columns { flex-direction: column; gap: 16px; }
+      .guestbook, .resource-section { max-width: 100%; }
+      .guestbook { padding: 12px 4px 8px 4px; }
+    }
+    .main-columns {
+      display: flex;
+      flex-direction: row;
+      gap: 32px;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto 32px auto;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .main-columns .guestbook, .main-columns .resource-section {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .resource-section { max-width: 600px; margin: 0 auto 32px auto; background: #fff; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); padding: 24px 20px 16px 20px; }
+    .resource-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; color: #6c63ff; }
+    .resource-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+    .resource-list { margin-top: 10px; }
+    .resource-item { border-bottom: 1px solid #f1f1f1; padding: 8px 0; }
+    .resource-notice { background: #f8f1ff; color: #6c63ff; padding: 8px; border-radius: 8px; margin-bottom: 10px; }
+    .resource-meta { margin-bottom: 4px; }
+    .resource-type { background: #6c63ff; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 8px; }
+    .resource-title { font-weight: 600; color: #333; }
+    .resource-uploader { color: #666; font-size: 0.9em; margin-left: 8px; }
+    .resource-date { color: #999; font-size: 0.8em; margin-left: 8px; }
+    .resource-desc { color: #555; margin: 4px 0; font-size: 0.9em; }
+    .resource-link { margin-top: 6px; }
+    .resource-link a { color: #6c63ff; text-decoration: none; padding: 4px 8px; background: #f0f0ff; border-radius: 4px; display: inline-block; margin-right: 8px; }
+    .resource-link a:hover { background: #e0e0ff; }
+    
+    /* 카테고리 버튼 스타일 */
+    .resource-categories {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .category-btn {
+      background: #f0f0f0;
+      color: #666;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .category-btn:hover {
+      background: #e0e0e0;
+    }
+    
+    .category-btn.active {
+      background: #6c63ff;
+      color: white;
+      border-color: #6c63ff;
+    }
+    
+    /* 카테고리 선택 스타일 */
+    .resource-form select {
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border 0.2s;
+      background: white;
+    }
+    
+    .resource-form select:focus {
+      border: 1.5px solid #6c63ff;
     }
     
     /* 이미지 슬라이더 스타일 */
@@ -181,19 +301,53 @@
     </div>
     
     <div class="main-action">
-      <button onclick="location.href='indexstringart.html'" class="orange">String Art 시작하기</button>
-      <button onclick="location.href='circle_numbers_html_p_5.html'" class="orange">Circle Numbers image</button>
-      <button onclick="location.href='indexmaking.html'" class="green">만드는 방법</button>
-      <button onclick="location.href='resource.html'" class="green">자료실</button>
-      <button onclick="location.href='buy.html'" class="orange">구매정보</button>
-      <button onclick="window.open('https://www.youtube.com/@makit-q9h', '_blank')" class="red">유튜브 채널 링크</button>
-      <button onclick="location.href='index3d.html'" class="blue">3D로 보기</button>
+      <button onclick="location.href='indexstringart.html'" style="margin-left:16px;background:#ffb347;">String Art 시작하기</button>
+      <button onclick="location.href='circle_numbers_html_p_5.html'" style="margin-left:16px;background:#ffb347;">Circle Numbers image</button>
+      <button onclick="location.href='buy.html'" style="margin-left:16px;background:#ffb347;">구매정보</button>
+    </div>
+    <div class="main-columns">
+      <section class="guestbook">
+        <div class="guestbook-title">방명록</div>
+        <form class="guestbook-form" id="guestbook-form">
+          <input type="text" id="guestbook-name" placeholder="이름" maxlength="12" required />
+          <textarea id="guestbook-msg" placeholder="메시지를 남겨주세요" rows="2" maxlength="1000" required></textarea>
+          <button type="submit">남기기</button>
+        </form>
+        <div class="guestbook-list" id="guestbook-list"></div>
+      </section>
+      <section class="resource-section">
+        <div class="resource-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>자료실</span>
+          <button onclick="location.href='indexresource.html'" style="background:#6c63ff;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;">자료실로 이동</button>
+        </div>
+        <div class="resource-notice">업로드는 지원하지 않습니다. 자료는 별도 페이지에서 열람하세요.</div>
+      </section>
     </div>
   </main>
   <footer>
     &copy; 2024 String Art Gallery. All rights reserved.
   </footer>
-  <script>
+  <script type="module">
+    // Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDc_s6XoTGSws8211lGSCS03RTP6t_CgMs",
+      authDomain: "stringphotokr.firebaseapp.com",
+      projectId: "stringphotokr",
+      storageBucket: "stringphotokr.firebasestorage.app",
+      messagingSenderId: "159224274999",
+      appId: "1:159224274999:web:c15b0311931d2a98171fb2",
+      measurementId: "G-P906LHL215"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch(e) {}
+    const db = getFirestore(app);
     // SVG 로고 동적 삽입
     fetch('resources/smallholder.svg').then(r=>r.text()).then(svg=>{
       document.getElementById('logo').innerHTML = svg;
@@ -263,6 +417,106 @@
       // 페이지 로드 시 이미지 로드
       loadImagesFromShowbox();
     }
+
+    // 방명록 기능 (MySQL+PHP 연동)
+    const form = document.getElementById('guestbook-form');
+    const nameInput = document.getElementById('guestbook-name');
+    const msgInput = document.getElementById('guestbook-msg');
+    const listDiv = document.getElementById('guestbook-list');
+
+    async function loadEntries() {
+      const q = query(collection(db, 'guestbook'), orderBy('created_at', 'desc'));
+      const snap = await getDocs(q);
+      const entries = [];
+      snap.forEach(doc => {
+        const d = doc.data();
+        const ts = d.created_at && d.created_at.toDate ? d.created_at.toDate() : null;
+        const dateStr = ts ? ts.toISOString().replace('T',' ').slice(0,16) : '';
+        entries.push({ name: d.name || '익명', msg: d.msg || '', date: dateStr });
+      });
+      listDiv.innerHTML = entries.map(e => `
+        <div class="guestbook-entry">
+          <span class="name">${e.name}</span>
+          <span class="date">${e.date}</span>
+          <div class="msg">${e.msg}</div>
+        </div>
+      `).join('') || '<div style="color:#bbb;text-align:center;">아직 방명록이 없습니다.</div>';
+    }
+
+    form.onsubmit = async function(e) {
+      e.preventDefault();
+      const name = nameInput.value.trim() || '익명';
+      const msg = msgInput.value.trim();
+      if (!msg) return;
+      await addDoc(collection(db, 'guestbook'), {
+        name,
+        msg,
+        created_at: serverTimestamp()
+      });
+      await loadEntries();
+      nameInput.value = '';
+      msgInput.value = '';
+    };
+
+    loadEntries();
+    // ===== 자료실 기능 =====
+    let currentCategory = 'all';
+    
+    // 카테고리 설정 - 사용자가 원하는 이름으로 수정 가능
+    // 키: 데이터베이스에 저장될 값, 값: 화면에 표시될 이름
+    const categories = {
+      'all': '전체보기',
+      'machine': '머신제작자료',  // 스트링아트 머신 만들기 관련 자료
+      'request': '요청자료',      // 방문자들의 스트링아트 요청 자료
+      'result': '결과물자료'      // 스트링아트 요청 건에 대한 결과물 자료
+    };
+    
+    async function loadResources() {}
+
+    // 카테고리 버튼 동적 생성
+    function createCategoryButtons() {
+      const container = document.querySelector('.resource-categories');
+      container.innerHTML = '';
+      
+      Object.entries(categories).forEach(([key, name]) => {
+        const btn = document.createElement('button');
+        btn.className = `category-btn ${key === 'all' ? 'active' : ''}`;
+        btn.setAttribute('data-category', key);
+        btn.textContent = name;
+        btn.addEventListener('click', function() {
+          // 모든 버튼에서 active 클래스 제거
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          // 클릭된 버튼에 active 클래스 추가
+          this.classList.add('active');
+          // 해당 카테고리 자료 로드
+          const category = this.getAttribute('data-category');
+          loadResources(category);
+        });
+        container.appendChild(btn);
+      });
+    }
+    
+    // 카테고리 선택 옵션 동적 생성
+    function createCategoryOptions() {
+      const select = document.getElementById('resource-category');
+      select.innerHTML = '<option value="">카테고리 선택</option>';
+      
+      Object.entries(categories).forEach(([key, name]) => {
+        if (key !== 'all') { // 전체보기는 선택 옵션에서 제외
+          const option = document.createElement('option');
+          option.value = key;
+          option.textContent = name;
+          select.appendChild(option);
+        }
+      });
+    }
+
+    /* 업로드 기능 제거 */
+
+    // 자료실 초기화
+    createCategoryButtons();
+    createCategoryOptions();
+    loadResources();
     
     // 이미지 슬라이더 초기화
     loadSliderImages();

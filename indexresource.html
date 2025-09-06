@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>자료실</title>
+  <style>
+    body { margin:0; font-family:Arial, Helvetica, sans-serif; background:#f7f7fb; color:#222; }
+    header { display:flex; align-items:center; justify-content:space-between; padding:16px; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,0.05); position:sticky; top:0; z-index:10; }
+    .title { font-weight:700; font-size:1.2rem; }
+    .back { background:#6c63ff; color:#fff; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; }
+    .wrap { max-width:1100px; margin:0 auto; padding:16px; }
+    .hint { color:#666; font-size:0.95rem; margin:8px 0 16px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:12px; }
+    .card { background:#fff; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05); overflow:hidden; display:flex; flex-direction:column; }
+    .thumb { position:relative; background:#f2f3f7; display:flex; align-items:center; justify-content:center; aspect-ratio: 1 / 1; overflow:hidden; }
+    .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .thumb video { width:100%; height:100%; object-fit:cover; display:block; background:#000; }
+    .filepill { position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,0.7); color:#fff; font-size:0.75rem; padding:2px 6px; border-radius:6px; }
+    .meta { padding:10px 12px; display:flex; flex-direction:column; gap:6px; }
+    .name { font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .row { display:flex; gap:8px; }
+    .btn { flex:1; text-align:center; background:#f0f0ff; color:#6c63ff; padding:6px 8px; border-radius:8px; text-decoration:none; font-weight:600; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">자료실</div>
+    <button class="back" onclick="location.href='index.html'">메인으로</button>
+  </header>
+  <div class="wrap">
+    <div class="hint">resources/ 와 uploads/ 폴더의 파일을 나열합니다. 이미지/영상은 미리보기, 그 외는 파일형식으로 표시합니다.</div>
+    <div id="grid" class="grid"></div>
+  </div>
+
+  <script type="module">
+    const OWNER = 'jungwonwoong';
+    const REPO = 'stringphoto';
+    const BRANCH = 'main';
+    const DIRS = ['resources', 'uploads'];
+
+    function isImage(name){ return /\.(png|jpg|jpeg|gif|webp|bmp|svg)$/i.test(name); }
+    function isVideo(name){ return /\.(mp4|webm|ogg|mov|m4v)$/i.test(name); }
+    function ext(name){ const m = name.match(/\.([^.]+)$/); return (m?m[1]:'file').toUpperCase(); }
+
+    async function listDir(path){
+      const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(BRANCH)}`;
+      const r = await fetch(url);
+      if (!r.ok) return [];
+      const arr = await r.json();
+      return Array.isArray(arr) ? arr.filter(x=>x.type==='file') : [];
+    }
+
+    function fileToCard(f){
+      const name = f.name;
+      const raw = f.download_url || `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${name}`;
+      const preview = raw;
+      const item = document.createElement('div');
+      item.className = 'card';
+
+      const t = document.createElement('div');
+      t.className = 'thumb';
+      if (isImage(name)) {
+        const img = document.createElement('img');
+        img.loading = 'lazy';
+        img.src = preview;
+        t.appendChild(img);
+      } else if (isVideo(name)) {
+        const v = document.createElement('video');
+        v.src = preview;
+        v.controls = true;
+        t.appendChild(v);
+      } else {
+        const label = document.createElement('div');
+        label.textContent = ext(name);
+        label.style.fontSize = '2.2rem';
+        label.style.fontWeight = '800';
+        label.style.color = '#6c63ff';
+        t.appendChild(label);
+        const pill = document.createElement('div');
+        pill.className = 'filepill';
+        pill.textContent = 'FILE';
+        t.appendChild(pill);
+      }
+
+      const m = document.createElement('div');
+      m.className = 'meta';
+      const nm = document.createElement('div');
+      nm.className = 'name';
+      nm.title = name;
+      nm.textContent = name;
+      const row = document.createElement('div');
+      row.className = 'row';
+      const a1 = document.createElement('a');
+      a1.className = 'btn';
+      a1.href = raw;
+      a1.target = '_blank';
+      a1.textContent = '원본 열기';
+      const a2 = document.createElement('a');
+      a2.className = 'btn';
+      a2.href = f.html_url || `https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/${f.path}`;
+      a2.target = '_blank';
+      a2.textContent = 'GitHub';
+      row.append(a1, a2);
+
+      m.append(nm, row);
+      item.append(t, m);
+      return item;
+    }
+
+    async function main(){
+      const grid = document.getElementById('grid');
+      for (const dir of DIRS){
+        const files = await listDir(dir).catch(()=>[]);
+        files.forEach(f=> grid.appendChild(fileToCard(f)) );
+      }
+      if (!grid.children.length){
+        grid.innerHTML = '<div style="grid-column:1/-1;color:#777;text-align:center;">표시할 파일이 없습니다.</div>';
+      }
+    }
+    main();
+  </script>
+</body>
+</html>
+
+
