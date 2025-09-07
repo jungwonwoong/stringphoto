@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -113,8 +113,6 @@
     .guestbook-form button:hover {
       background: #554ee0;
     }
-    .guestbook-list {
-    }
     .guestbook-entry {
       border-bottom: 1px solid #f1f1f1;
       padding: 8px 0;
@@ -182,7 +180,7 @@
     .resource-link a { color: #6c63ff; text-decoration: none; padding: 4px 8px; background: #f0f0ff; border-radius: 4px; display: inline-block; margin-right: 8px; }
     .resource-link a:hover { background: #e0e0ff; }
     
-    /* 카테고리 버튼 스타일 */
+    /* Category button styles */
     .resource-categories {
       display: flex;
       gap: 8px;
@@ -212,7 +210,7 @@
       border-color: #6c63ff;
     }
     
-    /* 카테고리 선택 스타일 */
+    /* Category select styles */
     .resource-form select {
       font-family: inherit;
       font-size: 1rem;
@@ -228,7 +226,7 @@
       border: 1.5px solid #6c63ff;
     }
     
-    /* 이미지 슬라이더 스타일 */
+    /* Image slider styles */
     .image-slider-container {
       width: 100%;
       height: 20vh;
@@ -285,42 +283,42 @@
 </head>
 <body>
   <header>
-    <!-- SVG 로고 -->
+    <!-- SVG logo -->
     <span id="logo"></span>
     <div>
       <div class="site-title">String Art Gallery</div>
-      <div class="site-desc">실로 그리는 예술, String Art의 세계에 오신 것을 환영합니다!</div>
+      <div class="site-desc">Welcome to the world of String Art — art drawn with thread!</div>
     </div>
   </header>
   <main>
-    <!-- 이미지 슬라이더 -->
+    <!-- Image slider -->
     <div class="image-slider-container">
       <div class="image-slider" id="image-slider">
-        <!-- 이미지들이 동적으로 로드됩니다 -->
+        <!-- Images will be loaded dynamically -->
       </div>
     </div>
     
     <div class="main-action">
-      <button onclick="location.href='indexstringart.html'" style="margin-left:16px;background:#ffb347;">String Art 시작하기</button>
+      <button onclick="location.href='indexstringart.html'" style="margin-left:16px;background:#ffb347;">Start String Art</button>
       <button onclick="location.href='circle_numbers_html_p_5.html'" style="margin-left:16px;background:#ffb347;">Circle Numbers image</button>
-      <button onclick="location.href='buy.html'" style="margin-left:16px;background:#ffb347;">구매정보</button>
+      <button onclick="location.href='buy.html'" style="margin-left:16px;background:#ffb347;">Purchase Info</button>
     </div>
     <div class="main-columns">
       <section class="guestbook">
-        <div class="guestbook-title">방명록</div>
+        <div class="guestbook-title">Guestbook</div>
         <form class="guestbook-form" id="guestbook-form">
-          <input type="text" id="guestbook-name" placeholder="이름" maxlength="12" required />
-          <textarea id="guestbook-msg" placeholder="메시지를 남겨주세요" rows="2" maxlength="1000" required></textarea>
-          <button type="submit">남기기</button>
+          <input type="text" id="guestbook-name" placeholder="Name" maxlength="12" required />
+          <textarea id="guestbook-msg" placeholder="Leave a message" rows="2" maxlength="1000" required></textarea>
+          <button type="submit">Submit</button>
         </form>
         <div class="guestbook-list" id="guestbook-list"></div>
       </section>
       <section class="resource-section">
         <div class="resource-title" style="display:flex;align-items:center;justify-content:space-between;">
-          <span>자료실</span>
-          <button onclick="location.href='indexresource.html'" style="background:#6c63ff;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;">자료실로 이동</button>
+          <span>Resources</span>
+          <button onclick="location.href='indexresource.html'" style="background:#6c63ff;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;">Go to Resources</button>
         </div>
-        <div class="resource-notice">업로드는 지원하지 않습니다. 자료는 별도 페이지에서 열람하세요.</div>
+        <div class="resource-notice">Uploads are not supported. Please view resources on a separate page.</div>
       </section>
     </div>
   </main>
@@ -348,18 +346,18 @@
     const app = initializeApp(firebaseConfig);
     try { getAnalytics(app); } catch(e) {}
     const db = getFirestore(app);
-    // SVG 로고 동적 삽입
+    // Insert SVG logo dynamically
     fetch('resources/smallholder.svg').then(r=>r.text()).then(svg=>{
       document.getElementById('logo').innerHTML = svg;
     });
 
-    // 이미지 슬라이더 기능
+    // Image slider functionality
     function loadSliderImages() {
       const sliderContainer = document.getElementById('image-slider');
       
-      // showbox 폴더에서 이미지 파일들을 가져오는 함수
+      // Function to load image files from the showbox folder
       function loadImagesFromShowbox() {
-        // 일반적인 이미지 파일명들 (사용자가 업로드할 가능성이 높은 이름들)
+        // Common image filenames (likely uploaded names)
         const commonImageNames = [];
 
         for(let i=0;i<100;i++) {
@@ -371,9 +369,9 @@
         
         function checkNextImage() {
           if (checkedCount >= commonImageNames.length) {
-            // 모든 이미지를 확인했는데 로드된 것이 없으면 플레이스홀더 표시
+            // If all images are checked and none loaded, show placeholder
             if (loadedImages.length === 0) {
-              sliderContainer.innerHTML = '<div class="slider-placeholder">showbox 폴더에 이미지를 업로드해주세요<br><small>지원 형식: JPG, PNG, GIF, WEBP</small><br><small>파일명 예시: image1.jpg, photo.png, 1.jpg</small></div>';
+              sliderContainer.innerHTML = '<div class="slider-placeholder">Please upload images to the showbox folder<br><small>Supported formats: JPG, PNG, GIF, WEBP</small><br><small>Filename examples: image1.jpg, photo.png, 1.jpg</small></div>';
             } else {
               createSliderWithImages(loadedImages);
             }
@@ -400,7 +398,7 @@
         function createSliderWithImages(imageList) {
           if (imageList && imageList.length > 0) {
             let html = '';
-            // 이미지를 여러 번 복사해서 무한 루프 효과를 만듭니다
+            // Duplicate images multiple times to create an infinite loop effect
             for (let i = 0; i < 3; i++) {
               imageList.forEach(imgSrc => {
                 html += `<img src="${imgSrc}" alt="String Art Gallery" onerror="this.style.display='none'">`;
@@ -410,15 +408,15 @@
           }
         }
         
-        // 이미지 확인 시작
+        // Start image checking
         checkNextImage();
       }
       
-      // 페이지 로드 시 이미지 로드
+      // Load images on page load
       loadImagesFromShowbox();
     }
 
-    // 방명록 기능 (MySQL+PHP 연동)
+    // Guestbook feature
     const form = document.getElementById('guestbook-form');
     const nameInput = document.getElementById('guestbook-name');
     const msgInput = document.getElementById('guestbook-msg');
@@ -432,7 +430,7 @@
         const d = doc.data();
         const ts = d.created_at && d.created_at.toDate ? d.created_at.toDate() : null;
         const dateStr = ts ? ts.toISOString().replace('T',' ').slice(0,16) : '';
-        entries.push({ name: d.name || '익명', msg: d.msg || '', date: dateStr });
+        entries.push({ name: d.name || 'Anonymous', msg: d.msg || '', date: dateStr });
       });
       listDiv.innerHTML = entries.map(e => `
         <div class="guestbook-entry">
@@ -440,12 +438,12 @@
           <span class="date">${e.date}</span>
           <div class="msg">${e.msg}</div>
         </div>
-      `).join('') || '<div style="color:#bbb;text-align:center;">아직 방명록이 없습니다.</div>';
+      `).join('') || '<div style="color:#bbb;text-align:center;">No guestbook entries yet.</div>';
     }
 
     form.onsubmit = async function(e) {
       e.preventDefault();
-      const name = nameInput.value.trim() || '익명';
+      const name = nameInput.value.trim() || 'Anonymous';
       const msg = msgInput.value.trim();
       if (!msg) return;
       await addDoc(collection(db, 'guestbook'), {
@@ -459,21 +457,21 @@
     };
 
     loadEntries();
-    // ===== 자료실 기능 =====
+    // ===== Resources feature =====
     let currentCategory = 'all';
     
-    // 카테고리 설정 - 사용자가 원하는 이름으로 수정 가능
-    // 키: 데이터베이스에 저장될 값, 값: 화면에 표시될 이름
+    // Category configuration - customizable
+    // Key: stored value, Value: display name
     const categories = {
-      'all': '전체보기',
-      'machine': '머신제작자료',  // 스트링아트 머신 만들기 관련 자료
-      'request': '요청자료',      // 방문자들의 스트링아트 요청 자료
-      'result': '결과물자료'      // 스트링아트 요청 건에 대한 결과물 자료
+      'all': 'All',
+      'machine': 'Machine Build Resources',  // Resources for building string art machines
+      'request': 'Requests',      // Visitors' string art requests
+      'result': 'Results'         // Results for requested string art
     };
     
     async function loadResources() {}
 
-    // 카테고리 버튼 동적 생성
+    // Dynamically create category buttons
     function createCategoryButtons() {
       const container = document.querySelector('.resource-categories');
       container.innerHTML = '';
@@ -484,11 +482,11 @@
         btn.setAttribute('data-category', key);
         btn.textContent = name;
         btn.addEventListener('click', function() {
-          // 모든 버튼에서 active 클래스 제거
+          // Remove the active class from all buttons
           document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-          // 클릭된 버튼에 active 클래스 추가
+          // Add the active class to the clicked button
           this.classList.add('active');
-          // 해당 카테고리 자료 로드
+          // Load resources for the selected category
           const category = this.getAttribute('data-category');
           loadResources(category);
         });
@@ -496,13 +494,13 @@
       });
     }
     
-    // 카테고리 선택 옵션 동적 생성
+    // Dynamically create category select options
     function createCategoryOptions() {
       const select = document.getElementById('resource-category');
-      select.innerHTML = '<option value="">카테고리 선택</option>';
+      select.innerHTML = '<option value="">Select a category</option>';
       
       Object.entries(categories).forEach(([key, name]) => {
-        if (key !== 'all') { // 전체보기는 선택 옵션에서 제외
+        if (key !== 'all') { // Exclude 'All' from select options
           const option = document.createElement('option');
           option.value = key;
           option.textContent = name;
@@ -511,14 +509,14 @@
       });
     }
 
-    /* 업로드 기능 제거 */
+    /* Upload feature removed */
 
-    // 자료실 초기화
+    // Initialize resources section
     createCategoryButtons();
     createCategoryOptions();
     loadResources();
     
-    // 이미지 슬라이더 초기화
+    // Initialize image slider
     loadSliderImages();
   </script>
 </body>
