@@ -13,7 +13,15 @@ let currentSequenceIndex = 0;
 let sequenceNumbers = [];
 let serialPort = null;
 let serialReader = null;
+let serialWriter = null;
 let Pins = 320;
+let readyState = true;
+// BULK sending state
+let totalLength = 0;
+let bulkChunkSize = 100;
+let bulkOffset = 0;
+let bulkSending = false;
+let waitingOkForBulk = false;
 // 버튼 상태 변수들
 let buttonStates = {
     CCW: false,    // A0
@@ -27,12 +35,19 @@ let buttonStates = {
     RESET: false   // RESET
 };
 
+// 길게 누르는 동안 연속 전송을 위한 상태
+let holdIntervals = {};
+const HOLD_INTERVAL_MS = 3;
+
 // 버튼 클릭 영역 저장
 let buttonAreas = {};
 
 // 리셋 버튼 깜빡임 관련
 let resetBlinkInterval = null;
 let resetBlinkState = false;
+// 드래그 아웃 감지를 위한 상태
+let currentPressedLabel = null;
+let canvasDom = null;
 function preload() {
     img_swbox = loadImage('textures/swbox.svg');
   }
@@ -44,6 +59,8 @@ function setup() {
     // 스케치 컨테이너에 캔버스 생= \-]
     let canvas = createCanvas(adaptWidth, adaptHeight);
     canvas.parent('sketch-container');
+    // 실제 캔버스 DOM 보관
+    canvasDom = canvas.canvas || (canvas.elt || null);
     
     // 초기 설정
     background(240);
@@ -56,10 +73,9 @@ function setup() {
     document.getElementById('main-content').style.marginTop = `${a}px`
     // 페이지 로드 시 기존 연결 정리
     cleanupOnPageLoad();
+    // 로컬스토리지 우선 로딩 (파일 오픈 시에는 그 데이터가 우선 적용됨)
+    loadSequenceFromLocalStorage();
     
-    // 마우스 이벤트 리스너
-    canvas.mousePressed(handleMousePressed);
-    canvas.mouseReleased(handleMouseReleased);
 }
 
 // 페이지 로드 시 기존 연결 정리
@@ -86,93 +102,24 @@ function draw() {
 function updateDisplay() {
     clear();
     background(240);
-    framedrawPins(Pins);
-    // 버튼 패널 그리기
-    drawButtonPanel();
-    
+
+
+    if(!markRunning) {
+        changeData();
+    }
     // 연결 상태 표시
     drawConnectionStatus();
     
     // 시퀀스 정보 표시
     drawSequenceInfo();
 }
+function changeData() {
+    const displayIndex = Math.min(Math.max(currentSequenceIndex, 0), sequenceNumbers.length - 1);
+    stepNow = sequenceNumbers[displayIndex];
+    stepNext = sequenceNumbers[displayIndex + 1];
+    console.log(stepNow);
+    console.log(stepNext);
 
-// 버튼 패널 그리기
-function drawButtonPanel() {
-
-    const panelX = 30;
-    const panelY = 30;
-    const swboxWidth=windowWidth*0.1;
-    const swboxHeight=windowWidth*0.1;
-    const buttonSize=swboxWidth*0.1057;
-    const spacing = swboxWidth*0.237
-    image(img_swbox, panelX,panelY,swboxWidth,swboxHeight);
-
-    // 첫 줄: UP
-    drawButton(buttonSize,panelX+swboxWidth*0.302, panelY+swboxWidth*0.1111, 'UP', buttonStates.UP, 'A0');
-    // // 두번째 줄: REV, FWD
-    drawButton(buttonSize,panelX + swboxWidth*0.302 + spacing,panelY+swboxWidth*0.1111+spacing/2, 'REV', buttonStates.REV, 'A1');
-    drawButton(buttonSize,panelX + swboxWidth*0.302 + spacing*2,panelY+swboxWidth*0.1111+spacing/2, 'FWD', buttonStates.FWD, 'A2');
-    
-    // // 세번째 줄: DN
-    // drawButton(buttonSize,panelX, panelY + buttonSize, 'DN', buttonStates.DN, 'A3');
-    // // 네번째 줄: CCW, CW
-    // drawButton(buttonSize,panelX + buttonSize + spacing, panelY + buttonSize + spacing + buttonSize/2, 'CCW', buttonStates.CCW, 'A5');
-    // drawButton(buttonSize,panelX + (buttonSize + spacing) * 2, panelY + buttonSize + spacing + buttonSize/2, 'CW', buttonStates.CW, 'A4');
-    
-    // // 다섯번째 줄: RESET
-    // drawButton(buttonSize,panelX, panelY + buttonSize + spacing + buttonSize/2, 'RESET', buttonStates.RESET, 'RESET');
-    // // 여섯번째 줄: ON/OFF, SET
-    // drawSlider(panelX, panelY + buttonSize + buttonSize, buttonStates.ONOFF, 'D2');
-    // drawButton(buttonSize,panelX + buttonSize+25 + spacing+10 , panelY + buttonSize + spacing*2 + buttonSize, 'SET', buttonStates.SET, 'D3');
-}
-
-// 개별 버튼 그리기
-function drawButton(buttonSize,x, y,label, isActive, pin) {
-    // 버튼 배경 (원형)
-    fill(isActive ? color(255, 0, 0) : color(0, 0, 0));
-    stroke(0);
-    strokeWeight(1);
-    ellipse(x+buttonSize/2 , y+buttonSize/2, buttonSize, buttonSize);
-    
-
-    // 클릭 영역 저장
-    buttonAreas[label] = {
-        x: x, y: y, width: buttonSize, height: buttonSize, pin: pin
-    };
-}
-
-// 슬라이더 그리기
-function drawSlider(x, y, isOn, pin) {
-    const sliderWidth = 40;
-    const sliderHeight = 20;
-    const knobSize = 15;
-    
-    // 슬라이더 배경
-    fill(0);
-    stroke(200);
-    strokeWeight(3);
-    rect(x, y + 35, sliderWidth, sliderHeight, 40);
-    
-    // 슬라이더 노브
-    fill(isOn ? color(255, 0, 0) : color(0, 0, 0));
-    const knobX = isOn ? x + sliderWidth - knobSize - 10 : x + 10;
-    ellipse(knobX + knobSize/2, y + 35 + sliderHeight/2, knobSize, knobSize);
-    
-    // 라벨
-    fill(0);
-    textAlign(LEFT, CENTER);
-    textSize(10);
-    text(isOn ? 'ON' : 'OFF', x + 10, y + 25);
-    
-    // // 핀 정보
-    // textSize(12);
-    // text(pin, x + 75, y + 130);
-    
-    // 클릭 영역 저장
-    buttonAreas['ON/OFF'] = {
-        x: x, y: y, width: sliderWidth, height: 150, pin: pin, isSlider: true
-    };
 }
 
 // 연결 상태 표시
@@ -205,9 +152,11 @@ function drawSequenceInfo() {
     fill(80);
     
     if (sequenceNumbers.length > 0) {
+        const displayIndex = Math.min(Math.max(currentSequenceIndex, 0), sequenceNumbers.length - 1);
+        const currentVal = sequenceNumbers[displayIndex];
         text(`로드된 시퀀스: ${sequenceNumbers.length}개 숫자`, infoX, infoY);
-        text(`현재 진행: ${currentSequenceIndex + 1}/${sequenceNumbers.length}`, infoX, infoY + 25);
-        text(`현재 값: ${sequenceNumbers[currentSequenceIndex] || '대기중'}`, infoX, infoY + 50);
+        text(`현재 진행: ${displayIndex + 1}/${sequenceNumbers.length}`, infoX, infoY + 25);
+        text(`현재 값: ${currentVal !== undefined ? currentVal : '대기중'}`, infoX, infoY + 50);
     } else {
         textAlign(LEFT);
         text('시퀀스 파일을 로드해주세요', windowWidth*0.15, 60);
@@ -224,6 +173,7 @@ function handleFileSelect(event) {
             parseSequenceFile(content);
         };
         reader.readAsText(file);
+        
     } else {
         alert('올바른 .txt 파일을 선택해주세요.');
     }
@@ -233,19 +183,22 @@ function handleFileSelect(event) {
 function parseSequenceFile(content) {
     try {
         // 쉼표로 구분된 숫자들을 파싱
-        sequenceNumbers = content.split(',')
+        const nums = content.split(',')
             .map(num => num.trim())
             .filter(num => num !== '')
             .map(num => parseInt(num))
             .filter(num => !isNaN(num));
         
-        if (sequenceNumbers.length === 0) {
+        if (nums.length === 0) {
             alert('파일에서 유효한 숫자를 찾을 수 없습니다.');
             return;
         }
+        // 첫 번째 값은 핀 개수(PINS), 나머지는 시퀀스
+        Pins = nums[0];
+        sequenceNumbers = nums.slice(1);
         
         currentSequenceIndex = 0;
-        console.log('시퀀스 로드됨:', sequenceNumbers);
+        console.log('핀수(PINS):', Pins, '시퀀스 길이:', sequenceNumbers.length);
         updateDisplay();
         
         // 파일 입력 초기화
@@ -254,6 +207,33 @@ function parseSequenceFile(content) {
     } catch (error) {
         console.error('파일 파싱 오류:', error);
         alert('파일을 읽는 중 오류가 발생했습니다.');
+    }
+}
+
+// 로컬스토리지에 저장된 "핀수,시퀀스..." 문자열 파싱 및 적용
+function loadSequenceFromLocalStorage() {
+    try {
+        const saved = localStorage.getItem('data');
+        if (typeof saved === 'string' && saved.trim().length > 0) {
+            applyLocalStorageSequence(saved);
+        }
+    } catch (e) { /* ignore */ }
+}
+
+function applyLocalStorageSequence(str) {
+    const parts = str.split(',').map(s => s.trim()).filter(s => s !== '');
+    if (parts.length === 0) return;
+    const maybePins = parseInt(parts[0]);
+    let startIdx = 0;
+    if (!isNaN(maybePins) && maybePins > 0) {
+        Pins = maybePins;
+        startIdx = 1;
+    }
+    const nums = parts.slice(startIdx).map(n => parseInt(n)).filter(n => !isNaN(n));
+    if (nums.length > 0) {
+        sequenceNumbers = nums;
+        currentSequenceIndex = 0;
+        updateDisplay();
     }
 }
 
@@ -276,44 +256,9 @@ function startMark() {
         console.log('MARK 시퀀스 시작됨');
         updateDisplay();
         
-        // 시퀀스 시작
-        advanceSequence();
+        // 배치 전송 시작
+        startBulkTransfer();
     }
-}
-
-function pauseMark() {
-    if (markRunning) {
-        markPaused = !markPaused;
-        console.log(markPaused ? 'BATTLE 일시정지됨' : 'BATTLE 재개됨');
-        
-        // 버튼 텍스트 업데이트
-        const pauseBtn = document.getElementById('pause-btn');
-        if (pauseBtn) {
-            pauseBtn.textContent = markPaused ? '재개' : '일시정지';
-        }
-        
-        // 일시정지 해제 시 시퀀스 재개
-        if (!markPaused && markRunning) {
-            advanceSequence();
-        }
-    }
-}
-
-function stopMark() {
-    markRunning = false;
-    markPaused = false;
-    currentSequenceIndex = 0;
-    console.log('BATTLE 정지됨');
-    updateDisplay();
-}
-
-function resetMark() {
-    markRunning = false;
-    markPaused = false;
-    currentSequenceIndex = 0;
-    sequenceNumbers = [];
-    console.log('BATTLE 리셋됨');
-    updateDisplay();
 }
 
 // Web Serial API를 사용한 MARK 연결
@@ -334,21 +279,21 @@ async function connectMark() {
         const port = await navigator.serial.requestPort();
         
         // 포트 정보 확인
-        console.log('선택된 포트 정보:', port);
+        // console.log('선택된 포트 정보:', port);
         
         // 포트 열기 시도 (여러 설정으로 시도)
         let portOpened = false;
-        const baudRates = [9600, 115200, 57600, 38400];
+        const baudRates = [115200, 9600];
         
         for (const baudRate of baudRates) {
             try {
-                console.log(`${baudRate} baud로 포트 열기 시도...`);
+                // console.log(`${baudRate} baud로 포트 열기 시도...`);
                 await port.open({ baudRate: baudRate });
                 portOpened = true;
-                console.log(`${baudRate} baud로 포트 열기 성공!`);
+                // console.log(`${baudRate} baud로 포트 열기 성공!`);
                 break;
             } catch (openError) {
-                console.log(`${baudRate} baud로 포트 열기 실패:`, openError.message);
+                // console.log(`${baudRate} baud로 포트 열기 실패:`, openError.message);
                 if (baudRate === baudRates[baudRates.length - 1]) {
                     throw new Error(`모든 baud rate로 포트 열기 실패. 마지막 오류: ${openError.message}`);
                 }
@@ -360,35 +305,20 @@ async function connectMark() {
         }
         
         serialPort = port;
-        console.log('Serial 포트 열림:', port);
+        // console.log('Serial 포트 열림:', port);
         
         // 잠시 대기 (아두이노 리셋 대기)
-        console.log('아두이노 리셋 대기 중... (2초)');
+        // console.log('아두이노 리셋 대기 중... (2초)');
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // StringPhoto 기기 식별 시도
-        const isStringPhotoDevice = await identifyStringPhotoDevice(port);
-        
-        if (isStringPhotoDevice) {
-            markConnected = true;
-            console.log('StringPhoto 기기 연결 성공!');
-            alert('StringPhoto 기기에 성공적으로 연결되었습니다!');
-            
-            // Serial 읽기 시작
-            startSerialReading();
-            
-            // 버튼 활성화 (indexstringartm.html에서 사용)
-            if (typeof window.enableAllButtons === 'function') {
-                window.enableAllButtons();
-            }
-            
-            updateDisplay();
-        } else {
-            await port.close();
-            serialPort = null;
-            alert('StringPhoto 기기가 아닙니다. 올바른 기기를 선택해 주세요.');
-            console.log('연결 실패 - StringPhoto 기기가 아님');
+        // 식별/읽기 생략: 쓰기 전용 모드로 전환
+        markConnected = true;
+        serialWriter = serialPort.writable.getWriter();
+        // ON/OFF 상태 업데이트 수신 시작
+        startSerialReading();
+        if (typeof window.enableAllButtons === 'function') {
+            window.enableAllButtons();
         }
+        updateDisplay();
         
     } catch (error) {
         console.error('Serial 연결 오류:', error);
@@ -406,284 +336,119 @@ async function connectMark() {
     }
 }
 
-// StringPhoto 기기 식별 (아두이노 우노/나노 모두 지원)
-async function identifyStringPhotoDevice(port) {
-    try {
-        console.log('아두이노 기기 식별 시작...');
-        
-        // 1. VID/PID 확인 (가능한 경우)
-        if (port.getInfo) {
-            try {
-                const info = port.getInfo();
-                console.log('포트 정보:', info);
-                
-                // 아두이노 우노와 나노의 일반적인 VID/PID
-                const arduinoVIDs = [
-                    0x2341, // Arduino LLC
-                    0x2A03, // Arduino.org
-                    0x0403, // FTDI
-                    0x10C4, // Silicon Labs CP210x
-                    0x1A86, // QinHeng Electronics CH340
-                    0x1969, // WCH.CN CH340
-                    0x067B, // Prolific Technology Inc.
-                ];
-                
-                const arduinoPIDs = [
-                    0x0043, // Arduino Uno
-                    0x0001, // Arduino Uno
-                    0x6001, // FTDI
-                    0xEA60, // CP210x
-                    0x7523, // CH340
-                    0x2918, // CH340
-                    0x2303, // Prolific
-                ];
-                
-                if (info.usbVendorId && info.usbProductId) {
-                    const vid = info.usbVendorId;
-                    const pid = info.usbProductId;
-                    console.log(`VID: 0x${vid.toString(16).toUpperCase()}, PID: 0x${pid.toString(16).toUpperCase()}`);
-                    
-                    if (arduinoVIDs.includes(vid) && arduinoPIDs.includes(pid)) {
-                        console.log('VID/PID로 아두이노 기기 확인됨 (1차 확인 성공)');
-                        // 1차 확인 성공, 이제 2차 StringPhoto 응답 확인 필요
-                    } else {
-                        console.log('VID/PID가 아두이노 기기와 일치하지 않음');
-                        return false; // 아두이노가 아니면 즉시 실패
-                    }
-                } else {
-                    console.log('VID/PID 정보 없음, 다음 단계로 진행');
-                }
-            } catch (error) {
-                console.log('포트 정보 가져오기 실패:', error);
-            }
-        }
-        
-        // 2. StringPhoto 기기 응답 확인 (2차 확인)
-        console.log('2차 확인: StringPhoto 기기 응답 테스트 시작...');
-        const isStringPhoto = await testArduinoCommands(port);
-        if (isStringPhoto) {
-            console.log('StringPhoto 기기 확인됨! (2차 확인 성공)');
-            return true;
-        } else {
-            console.log('StringPhoto 기기 응답 없음 (2차 확인 실패)');
-            return false;
-        }
-        
-    } catch (error) {
-        console.error('아두이노 기기 식별 오류:', error);
-        return false;
-    }
-}
-
-// 아두이노 특정 명령어로 식별
-async function testArduinoCommands(port) {
-    try {
-        console.log('StringPhoto 기기 식별 시작...');
-        
-        const writer = port.writable.getWriter();
-        
-        // StringPhoto 기기 식별 명령
-        const identifyCommand = new TextEncoder().encode('IDENTIFY\n');
-        await writer.write(identifyCommand);
-        writer.releaseLock();
-        
-        console.log('IDENTIFY 명령 전송됨');
-        
-        // 응답 읽기 (2초 대기)
-        const reader = port.readable.getReader();
-        const timeout = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Timeout')), 2000)
-        );
-        
-        try {
-            const { value, done } = await Promise.race([
-                reader.read(),
-                timeout
-            ]);
-            
-            reader.releaseLock();
-            
-            if (value) {
-                const response = new TextDecoder().decode(value);
-                console.log('기기 응답:', response);
-                
-                // "stringphoto" 응답 확인 (대소문자 구분 없음)
-                if (response.toLowerCase().includes('stringphoto')) {
-                    console.log('StringPhoto 기기 확인됨!');
-                    return true;
-                } 
-                // 임시: "638" 응답도 허용 (테스트용)
-                else if (response.includes('638')) {
-                    console.log('StringPhoto 기기 확인됨! (임시 허용: 638)');
-                    return true;
-                }
-                else {
-                    console.log('StringPhoto 기기가 아님. 응답:', response);
-                    return false;
-                }
-            } else {
-                console.log('응답 없음');
-                return false;
-            }
-            
-        } catch (error) {
-            reader.releaseLock();
-            console.log('응답 대기 시간 초과');
-            return false;
-        }
-        
-    } catch (error) {
-        console.error('StringPhoto 기기 식별 오류:', error);
-        return false;
-    }
-}
-
-// 기본 연결 테스트 (마지막 수단)
-async function testBasicConnection(port) {
-    try {
-        const writer = port.writable.getWriter();
-        const testCommand = new TextEncoder().encode('TEST\n');
-        await writer.write(testCommand);
-        writer.releaseLock();
-        
-        // 응답 대기 (1초)
-        const reader = port.readable.getReader();
-        const timeout = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Timeout')), 1000)
-        );
-        
-        try {
-            const { value, done } = await Promise.race([
-                reader.read(),
-                timeout
-            ]);
-            
-            reader.releaseLock();
-            
-            if (value) {
-                const response = new TextDecoder().decode(value);
-                console.log('기본 테스트 응답:', response);
-                return response.length > 0;
-            }
-            
-            return false;
-            
-        } catch (error) {
-            reader.releaseLock();
-            console.log('기본 테스트 응답 없음');
-            return false;
-        }
-        
-    } catch (error) {
-        console.error('기본 연결 테스트 오류:', error);
-        return false;
-    }
-}
-
-// Serial 읽기 시작
+// Serial 읽기 시작 (ON/OFF 상태 수신 전용)
 async function startSerialReading() {
     if (!serialPort) return;
-    
     try {
         const reader = serialPort.readable.getReader();
         serialReader = reader;
-        
-        let buffer = ''; // 데이터 버퍼
-        
+        let buffer = '';
         while (true) {
-            try {
-                const { value, done } = await reader.read();
-                if (done) break;
-                
-                const data = new TextDecoder().decode(value);
-                buffer += data; // 버퍼에 데이터 추가
-                
-                // 완전한 라인 처리
-                const lines = buffer.split('\n');
-                buffer = lines.pop(); // 마지막 불완전한 라인은 버퍼에 유지
-                
-                for (const line of lines) {
-                    if (line.trim()) { // 빈 라인 제외
-                        console.log('Serial 수신:', line.trim());
-                        handleArduinoResponse(line.trim());
-                    }
-                }
-                
-            } catch (error) {
-                console.error('Serial 읽기 오류:', error);
-                break;
+            const { value, done } = await reader.read();
+            if (done) break;
+            const data = new TextDecoder().decode(value);
+            buffer += data;
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed) handleArduinoResponse(trimmed);
             }
         }
-        
-    } catch (error) {
-        console.error('Serial 읽기 시작 오류:', error);
+    } catch (e) {
+        // ignore
     }
 }
 
-// 아두이노 응답 처리
 function handleArduinoResponse(data) {
-    // 아두이노로부터의 응답을 처리하는 로직
-    if (data.includes('READY')) {
-        console.log('아두이노 준비 완료');
-    } else if (data.includes('DONE')) {
-        console.log('아두이노 작업 완료');
-    } else if (data.includes('ERROR')) {
-        console.log('아두이노 오류 발생');
-    } else if (data.includes('RESET')) {
-        console.log('아두이노 리셋 완료');
-    }
-    
-    // 버튼 상태 업데이트 처리
-    // 형식: "BUTTON:STATE" (예: "FWD:ON", "UP:OFF")
-    const buttonMatch = data.match(/^(\w+):(ON|OFF)$/);
-    if (buttonMatch) {
-        const button = buttonMatch[1];
-        const state = buttonMatch[2] === 'ON';
-        
-        // 버튼 상태 업데이트 (상호 배타적)
-        if (button === 'ONOFF') {
-            buttonStates.ONOFF = state;
-        } else if (button === 'RESET') {
-            buttonStates.RESET = state;
-        } else if (buttonStates.hasOwnProperty(button)) {
-            if (state) {
-                // ON 상태일 때: 다른 모든 버튼을 OFF로 만들고 현재 버튼만 ON
-                for (const otherButton in buttonStates) {
-                    if (otherButton !== 'ONOFF' && otherButton !== 'RESET' && otherButton !== button) {
-                        buttonStates[otherButton] = false;
-                    }
-                }
-                buttonStates[button] = true;
-            } else {
-                // OFF 상태일 때: 현재 버튼만 OFF
-                buttonStates[button] = false;
-            }
-        }
-        
-        console.log(`아두이노로부터 버튼 상태 수신: ${button} = ${state ? 'ON' : 'OFF'}`);
+    // ON/OFF:ON|OFF 만 반영
+    const m = data.match(/^ONOFF:(ON|OFF)$/);
+    const m2 = data.match(/ready/i);
+    const m3 = data.match(/start/i);
+    const m4 = data.match(/^ok$/i);
+    const m5 = data.match(/^prog$/i);
+    console.log(data);
+    if (m) {
+        buttonStates.ONOFF = m[1] === 'OFF';
         updateDisplay();
     }
+    if (m2) {
+        readyState = true;
+        updateDisplay();
+    }
+    if (m3) {
+        readyState = false;
+        startMark()
+    }
+    if (m5) {
+        // per-step progress during bulk: advance UI index
+        if (bulkSending) {
+            currentSequenceIndex = Math.min(currentSequenceIndex + 1, sequenceNumbers.length - 1);
+            changeData();
+            updateDisplay();
+        }
+        return;
+    }
+    if (m4) {
+        if (bulkSending) {
+            // 청크 처리 완료 시 진행 인덱스를 반영 (표시용)
+            currentSequenceIndex = Math.min(bulkOffset, sequenceNumbers.length - 1);
+        }
+        updateDisplay();
+        if (bulkSending) {
+            sendNextBulkChunk();
+        } else {
+            advanceSequence();
+        }
+    }
 }
 
-// Serial 통신으로 데이터 전송
-async function sendToArduino(data) {
-    if (!serialPort || !markConnected) {
-        console.log('Serial 포트가 연결되지 않았습니다.');
+// 시퀀스 한 스텝(cur,next) 전송
+async function sendSequence(stepNow, stepNext) {
+    if (!serialPort || !markConnected || !serialWriter) return false;
+    if (stepNow === undefined || stepNext === undefined) return false;
+    try {
+        const line = `STEP:${stepNow},${stepNext}\n`;
+        await serialWriter.write(new TextEncoder().encode(line));
+        return true;
+    } catch (e) {
         return false;
     }
-    
+}
+
+// Send PINS/LEN and first BULK chunk
+async function startBulkTransfer() {
+    if (!serialPort || !markConnected || !serialWriter) return;
+    if (!Array.isArray(sequenceNumbers) || sequenceNumbers.length === 0) return;
+    totalLength = sequenceNumbers.length;
+    bulkOffset = 0;
+    bulkSending = true;
+    // 1) send PINS
+    await serialWriter.write(new TextEncoder().encode(`PINS:${Pins}\n`));
+    // 2) send LEN (optional)
+    await serialWriter.write(new TextEncoder().encode(`LEN:${totalLength}\n`));
+    // 3) send first BULK chunk
+    await sendNextBulkChunk();
+}
+
+async function sendNextBulkChunk() {
+    if (!serialPort || !markConnected || !serialWriter) return;
+    if (!bulkSending) return;
+    if (bulkOffset >= totalLength) {
+        // finished
+        bulkSending = false;
+        return;
+    }
+    const end = Math.min(bulkOffset + bulkChunkSize, totalLength);
+    const slice = sequenceNumbers.slice(bulkOffset, end);
+    const payload = `BULK:${slice.join(',')}\n`;
     try {
-        const writer = serialPort.writable.getWriter();
-        const command = new TextEncoder().encode(data.toString() + '\n');
-        await writer.write(command);
-        writer.releaseLock();
-        
-        console.log(`아두이노로 전송: ${data}`);
-        return true;
-        
-    } catch (error) {
-        console.error('Serial 전송 오류:', error);
-        return false;
+        await serialWriter.write(new TextEncoder().encode(payload));
+        bulkOffset = end;
+        // wait for OK; next chunk is triggered by handleArduinoResponse
+    } catch (e) {
+        console.error('BULK write error', e);
+        bulkSending = false;
     }
 }
 
@@ -704,6 +469,14 @@ async function disconnectMark() {
                 }
             }
             
+            // Serial 쓰기 해제
+            if (serialWriter) {
+                try {
+                    serialWriter.releaseLock();
+                } catch (e) {}
+                serialWriter = null;
+            }
+
             // 포트 닫기
             try {
                 await serialPort.close();
@@ -749,25 +522,19 @@ async function advanceSequence() {
     if (markRunning && !markPaused && sequenceNumbers.length > 0) {
         if (currentSequenceIndex < sequenceNumbers.length) {
             const currentValue = sequenceNumbers[currentSequenceIndex];
-            console.log(`시퀀스 진행: ${currentValue} (${currentSequenceIndex + 1}/${sequenceNumbers.length})`);
+            // 진행 로그 제거 (성능)
             
             // Serial 통신으로 데이터 전송
-            const sent = await sendSequence("0,2,3,2,6,8,0");
+            const sent = await sendSequence(stepNow, stepNext);
             
             if (sent) {
                 currentSequenceIndex++;
                 updateDisplay();
-                
-                // 다음 시퀀스로 진행 (1초 간격)
-                if (currentSequenceIndex < sequenceNumbers.length) {
-                    setTimeout(advanceSequence, 1000);
-                } else {
-                    console.log('시퀀스 완료!');
-                    markRunning = false;
-                    updateDisplay();
-                }
+                stepNow = sequenceNumbers[currentSequenceIndex];
+                stepNext = sequenceNumbers[currentSequenceIndex + 1];
+
             } else {
-                console.log('데이터 전송 실패, 시퀀스 중단');
+                // 실패 로그 제거
                 markRunning = false;
                 updateDisplay();
             }
@@ -775,147 +542,6 @@ async function advanceSequence() {
     }
 }
 
-// 마우스 다운 처리 (버튼 누를 때)
-function handleMousePressed() {
-    const clickX = mouseX;
-    const clickY = mouseY;
-    
-    // 각 버튼 영역 확인
-    for (const [label, area] of Object.entries(buttonAreas)) {
-        if (clickX >= area.x && clickX <= area.x + area.width &&
-            clickY >= area.y && clickY <= area.y + area.height) {
-            
-            handleButtonClick(label, area);
-            break;
-        }
-    }
-}
-
-// 마우스 업 처리 (버튼 뗄 때)
-function handleMouseReleased() {
-    const clickX = mouseX;
-    const clickY = mouseY;
-    
-    // 각 버튼 영역 확인
-    for (const [label, area] of Object.entries(buttonAreas)) {
-        if (clickX >= area.x && clickX <= area.x + area.width &&
-            clickY >= area.y && clickY <= area.y + area.height) {
-            
-            // 일반 택트 스위치만 버튼 업 처리
-            if (label !== 'RESET' && label !== 'ON/OFF') {
-                handleButtonUp(label);
-            }
-            break;
-        }
-    }
-}
-
-// 버튼 클릭 처리
-function handleButtonClick(label, area) {
-    console.log(`버튼 클릭: ${label} (핀: ${area.pin})`);
-    
-    if (label === 'RESET') {
-        // 리셋 버튼은 특별 처리
-        handleResetButton();
-    } else if (label === 'ON/OFF') {
-        // 슬라이더 스위치 토글
-        buttonStates.ONOFF = !buttonStates.ONOFF;
-        sendButtonStateToArduino('ONOFF', buttonStates.ONOFF);
-        updateDisplay();
-    } else {
-        // 일반 택트 스위치 - 버튼 다운 처리
-        handleButtonDown(label);
-    }
-}
-
-// 버튼 다운 처리 (누를 때)
-function handleButtonDown(label) {
-    console.log(`버튼 다운: ${label}`);
-    buttonStates[label] = true;
-    sendButtonStateToArduino(label, true);
-    updateDisplay();
-}
-
-// 버튼 업 처리 (뗄 때)
-function handleButtonUp(label) {
-    console.log(`버튼 업: ${label}`);
-    buttonStates[label] = false;
-    sendButtonStateToArduino(label, false);
-    updateDisplay();
-}
-
-// 리셋 버튼 처리
-function handleResetButton() {
-    if (resetBlinkInterval) return; // 이미 실행 중이면 무시
-    
-    console.log('리셋 버튼 시작');
-    
-    // 리셋 깜빡임 시작
-    resetBlinkInterval = setInterval(() => {
-        resetBlinkState = !resetBlinkState;
-        buttonStates.RESET = resetBlinkState;
-        updateDisplay();
-    }, 200);
-    
-    // 2초 후 리셋 완료
-    setTimeout(() => {
-        if (resetBlinkInterval) {
-            clearInterval(resetBlinkInterval);
-            resetBlinkInterval = null;
-        }
-        buttonStates.RESET = false;
-        resetBlinkState = false;
-        
-        // 아두이노에 리셋 명령 전송
-        sendButtonStateToArduino('RESET', false);
-        
-        console.log('리셋 완료');
-        updateDisplay();
-    }, 2000);
-}
-
-// 아두이노로 버튼 상태 전송
-async function sendButtonStateToArduino(button, state) {
-    if (!markConnected || !serialPort) {
-        console.log('아두이노가 연결되지 않았습니다.');
-        return;
-    }
-    
-    try {
-        const command = `${button}:${state ? 'ON' : 'OFF'}\n`;
-        
-        // WritableStream이 잠겨있는지 확인
-        if (serialPort.writable.locked) {
-            console.log('WritableStream이 잠겨있음, 잠시 대기...');
-            // 잠시 대기 후 재시도
-            await new Promise(resolve => setTimeout(resolve, 10));
-            
-            // 여전히 잠겨있다면 건너뛰기
-            if (serialPort.writable.locked) {
-                console.log('WritableStream이 여전히 잠겨있음, 전송 건너뛰기');
-                return;
-            }
-        }
-        
-        const writer = serialPort.writable.getWriter();
-        await writer.write(new TextEncoder().encode(command));
-        writer.releaseLock();
-        
-        console.log(`아두이노로 전송: ${button} = ${state ? 'ON' : 'OFF'}`);
-        
-    } catch (error) {
-        console.error('버튼 상태 전송 오류:', error);
-        
-        // WritableStream 잠금 오류인 경우 특별 처리
-        if (error.message.includes('locked')) {
-            console.log('WritableStream 잠금 오류, 전송 재시도 중...');
-            // 잠시 후 재시도
-            setTimeout(() => {
-                sendButtonStateToArduino(button, state);
-            }, 50);
-        }
-    }
-}
 
 // 윈도우 리사이즈 처리
 function windowResized() {
@@ -924,89 +550,4 @@ function windowResized() {
     resizeCanvas(adaptWidth, adaptHeight);
     updateDisplay();
 }
-function framedrawPins(pins) {
-    if(adaptWidth>adaptHeight) {
-        SIZE=adaptHeight;
-    } else {     
-            SIZE=adaptWidth;
-    }
-    if(pins == 240) framethickness = SIZE*0.1134/2;
-    if(pins == 280) framethickness = SIZE*0.0866/2;
-    if(pins == 320) framethickness = SIZE*0.1015;
-    ellipseMode(CENTER);
-    fill('rgba(100,100,100, 0)');
-    stroke('rgba(255,255,255,0)');
-    stroke('black');
-    stroke(0);
-    strokeWeight(1);
-    if(adaptWidth>adaptHeight) {
-    translate(adaptWidth/2 ,adaptHeight/2);
-    } else {
-        translate(adaptWidth/2 ,adaptHeight/2);
-    }
-    for (var i = 0; i < pins; i++) {
-        angleMode(RADIANS);
-        textSize(10);
-        textAlign(CENTER,CENTER);
-        stroke('rgba(0, 0, 0, 1)');
-        strokeWeight(1);
-        fill(0);
-        ellipse(SIZE/2-60,0,1,1)
-        if(i%5 == 0) {
-            line(SIZE/2-60,0,SIZE/2-60+10,0)
-            text(i,SIZE/2-60+20,0)           
-        } else {
-             line(SIZE/2-60,0,SIZE/2-60+5,0)
-        }
-         rotate((-TWO_PI / float(pins)));
-    }
-    translate(-adaptWidth/2,-adaptHeight/2);
-   rectMode(CORNER)
-}
-function lineDraw() {
-    clear();
-     background(255);
-     framedrawPins(Pins);
-     count++;
-     stroke('black');
-     strokeWeight(1);
-     var d = -2 * Math.PI / Pins;
-     var a = SIZE/2-60;
-     var posX = adaptWidth/2, posY = SIZE/2;
-     var offset =r;
-     for (let i = 0; i < strokeCount ; i+=2) {
-         p1 = createVector(((a + a * Math.cos(Math.abs(dataName[patternName][i]) * d)) - a)+posX,
-         ((a + a * Math.sin(Math.abs(dataName[patternName][i]) * d)) - a)+posY)
-         p2 = createVector(((a + a * Math.cos(Math.abs(dataName[patternName][i+1]) * d)) - a)+posX,
-         ((a + a * Math.sin(Math.abs(dataName[patternName][i+1]) * d)) - a)+posY)
-         if(i == strokeCount-2){
-             if(capstate == 0){
-             stroke(0);
-             strokeWeight(0)
-             fill('rgba(100%, 0%, 100%, 0.4)');
-             textSize(160)
-             textAlign(CENTER,CENTER);
-             text(Math.abs(dataName[patternName][i+1]),posX, posY+a+110)
-             stroke('magenta');
-             strokeWeight(3);
-             }
-             if(strokeCount > 2) {
-                 this.drawcanvas.childNodes[1].innerHTML = `<span style="font-size:large;">Prev</span><span>${Math.abs(dataName[patternName][i-2])} - ${Math.abs(dataName[patternName][i-1])}</span>`;
-             } else {
-                 this.drawcanvas.childNodes[1].innerHTML = '<span style="font-size:large;">Start</span><span>0</span>';
-             }
-             this.drawcanvas.childNodes[3].innerHTML = `<span style="font-size:large;">${strokeCount/2}/${dataName[patternName].length/2-1}</span><span style="font-size:xx-large;"> 
-         ${Math.abs(dataName[patternName][i])} - ${Math.abs(dataName[patternName][i+1])}</span>`;
-             if(strokeCount < dataName[patternName].length-2) {
-                 this.drawcanvas.childNodes[5].innerHTML =`<span style="font-size:large;">Next</span><span>${Math.abs(dataName[patternName][i+2])} - ${Math.abs(dataName[patternName][i+3])}</span>`;
-             } else {
-                 this.drawcanvas.childNodes[5].innerHTML = '<span style="font-size:large;">Finish</span><span>0</span>';
-             }
-         }
-         line(p1.x, p1.y, p2.x, p2.y);
-     }
-     if(capstate == 1) {
-         saveCanvas(patternName+ '.jpg');
-         capstate = 0;
-     }
-}
+
