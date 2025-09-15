@@ -30,9 +30,9 @@ int headOffset = 0; // logical rotation offset
 #define SERVO_TOP_POS 90
 #define SERVO_BOTTOM_POS 50
 
-const int pulseWidth = 20;
+const int pulseWidth = 5;
 const float startDelay = 4000.0;
-const float endDelay = 160.0;
+const float endDelay = 130.0;
 const float ck = 0.02;
 
 Servo servo;
@@ -367,17 +367,17 @@ void callibration(bool cal, bool dic, int sw) {
 }
 
 void sawing(bool drc) {
-  delay(50);
+  delay(20);
   servo.write(position.outleng);
-  delay(50);
+  delay(20);
   servo1.write(position.upleng);
-  delay(50);
+  delay(20);
   cRotate(drc, STEPS_PER_PIN);
-  delay(50);
+  delay(30);
   servo.write(position.inleng);
-  delay(50);
+  delay(20);
   servo1.write(position.downleng);
-  delay(50);
+  delay(40);
 }
 
 int arr_check(int* arr, int start, int end, int val) {

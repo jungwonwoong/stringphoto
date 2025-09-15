@@ -48,35 +48,33 @@ let resetBlinkState = false;
 // 드래그 아웃 감지를 위한 상태
 let currentPressedLabel = null;
 let canvasDom = null;
-function preload() {
-    img_swbox = loadImage('textures/swbox.svg');
-  }
-function setup() {
-    // 캔버스 생성 및 설정
-    adaptWidth = window.innerWidth; // 왼쪽 컨트롤 패널 공간 확보
-    adaptHeight = window.innerHeight-140;
-    
-    // 스케치 컨테이너에 캔버스 생= \-]
-    let canvas = createCanvas(adaptWidth, adaptHeight);
-    canvas.parent('sketch-container');
-    // 실제 캔버스 DOM 보관
-    canvasDom = canvas.canvas || (canvas.elt || null);
-    
-    // 초기 설정
-    background(240);
-    
-    // 테스트용 텍스트 표시
-    updateDisplay();
-    //sendSequence([43,67,98,129,314,2,0,28]);
-    // 파일 입력 이벤트 리스너
-    var a=document.getElementById('control-panel').getBoundingClientRect().height;
-    document.getElementById('main-content').style.marginTop = `${a}px`
+// DOM info panels
+let infoPanel = null;
+let statusDiv = null;
+let seqDiv = null;
+let progressWrap = null;
+let progressSlider = null;
+let etaDiv = null;
+let progLastTs = 0;
+let progCount = 0;
+let emaMs = null; // 스텝당 시간(ms) 지수가중평균
+function initApp() {
+    // 정보 패널 DOM 생성
+    initInfoPanels();
+    // UI 레이아웃 보정
+    try {
+        var a = document.getElementById('control-panel').getBoundingClientRect().height;
+        document.getElementById('main-content').style.marginTop = `${a}px`;
+    } catch(e) { /* ignore */ }
     // 페이지 로드 시 기존 연결 정리
     cleanupOnPageLoad();
     // 로컬스토리지 우선 로딩 (파일 오픈 시에는 그 데이터가 우선 적용됨)
     loadSequenceFromLocalStorage();
-    
+    // 초기 표시
+    updateDisplay();
 }
+// DOMContentLoaded에서 초기화
+try { window.addEventListener('DOMContentLoaded', initApp); } catch(e) { /* ignore */ }
 
 // 페이지 로드 시 기존 연결 정리
 function cleanupOnPageLoad() {
@@ -95,25 +93,20 @@ function cleanupOnPageLoad() {
     });
 }
 
-function draw() {
-    //sendSequence();
-}
+// draw(): removed (p5 제거)
 
 function updateDisplay() {
-    clear();
-    background(240);
-
-
     if(!markRunning) {
         changeData();
     }
-    // 연결 상태 표시
-    drawConnectionStatus();
-    
-    // 시퀀스 정보 표시
-    drawSequenceInfo();
+    updateInfoPanels();
 }
 function changeData() {
+    if (!markConnected) {
+        stepNow = 0;
+        stepNext = 0;
+        return;
+    }
     const displayIndex = Math.min(Math.max(currentSequenceIndex, 0), sequenceNumbers.length - 1);
     stepNow = sequenceNumbers[displayIndex];
     stepNext = sequenceNumbers[displayIndex + 1];
@@ -123,44 +116,134 @@ function changeData() {
 }
 
 // 연결 상태 표시
-function drawConnectionStatus() {
-    const statusX = 300;
-    const statusY = 30;
-    
-    textAlign(LEFT, TOP);
-    textSize(18);
-    
-    if (markConnected) {
-        fill(0, 150, 0);
-        text('BATTLE 연결됨', statusX, statusY);
-        fill(0, 150, 0);
-    } else {
-        fill(150, 0, 0);
-        text('BATTLE 연결 안됨', windowWidth*0.15, statusY);
-        fill(150, 0, 0);
-    }
-
-}
+function drawConnectionStatus() { /* deprecated: replaced by DOM */ }
 
 // 시퀀스 정보 표시
-function drawSequenceInfo() {
-    const infoX = 300;
-    const infoY = 60;
-    
-    textAlign(LEFT, TOP);
-    textSize(16);
-    fill(80);
-    
-    if (sequenceNumbers.length > 0) {
+function drawSequenceInfo() { /* deprecated: replaced by DOM */ }
+
+function initInfoPanels() {
+    try {
+        if (!infoPanel) {
+            infoPanel = document.createElement('div');
+            infoPanel.id = 'info-panel';
+            infoPanel.style.position = 'relative';
+            infoPanel.style.top = '20px';
+            infoPanel.style.zIndex = '1500';
+            infoPanel.style.background = 'rgba(255,255,255,0.9)';
+            infoPanel.style.border = '1px solid #ddd';
+            infoPanel.style.borderRadius = '8px';
+            infoPanel.style.padding = '10px 14px';
+            infoPanel.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)';
+            infoPanel.style.fontFamily = 'Arial, sans-serif';
+            infoPanel.style.fontSize = '14px';
+            infoPanel.style.color = '#333';
+            document.body.appendChild(infoPanel);
+        }
+        if (!statusDiv) {
+            statusDiv = document.createElement('div');
+            statusDiv.id = 'status-text';
+            statusDiv.style.marginBottom = '6px';
+            infoPanel.appendChild(statusDiv);
+        }
+        if (!seqDiv) {
+            seqDiv = document.createElement('div');
+            seqDiv.id = 'sequence-text';
+            infoPanel.appendChild(seqDiv);
+        }
+        if (!progressWrap) {
+            progressWrap = document.createElement('div');
+            progressWrap.style.marginTop = '8px';
+            infoPanel.appendChild(progressWrap);
+        }
+        if (!progressSlider) {
+            progressSlider = document.createElement('input');
+            progressSlider.type = 'range';
+            progressSlider.min = '0';
+            progressSlider.max = '0';
+            progressSlider.value = '0';
+            progressSlider.disabled = true;
+            progressSlider.style.width = '320px';
+            progressSlider.style.height = '6px';
+            progressSlider.style.cursor = 'default';
+            progressWrap.appendChild(progressSlider);
+        }
+        if (!etaDiv) {
+            etaDiv = document.createElement('div');
+            etaDiv.id = 'eta-text';
+            etaDiv.style.marginTop = '6px';
+            etaDiv.style.fontSize = '13px';
+            etaDiv.style.color = '#555';
+            infoPanel.appendChild(etaDiv);
+        }
+    } catch(e) { /* ignore */ }
+}
+
+function updateInfoPanels() {
+    if (!statusDiv || !seqDiv) return;
+    // 연결 상태
+    if (markConnected) {
+        statusDiv.textContent = 'BATTLE 연결됨';
+        statusDiv.style.color = 'rgb(0,150,0)';
+        statusDiv.style.fontWeight = '600';
+    } else {
+        statusDiv.textContent = 'BATTLE 연결 안됨';
+        statusDiv.style.color = 'rgb(150,0,0)';
+        statusDiv.style.fontWeight = '600';
+    }
+    // 시퀀스 정보
+    if (!markConnected) {
+        seqDiv.innerHTML = '로드된 시퀀스: 0개 숫자<br>현재 진행: 0/0<br>현재 값: 0';
+        if (progressSlider) {
+            progressSlider.max = '0';
+            progressSlider.value = '0';
+        }
+        if (etaDiv) {
+            etaDiv.textContent = '예상 총 시간: -  | 남은: -';
+        }
+        return;
+    }
+    if (sequenceNumbers && sequenceNumbers.length > 0) {
         const displayIndex = Math.min(Math.max(currentSequenceIndex, 0), sequenceNumbers.length - 1);
         const currentVal = sequenceNumbers[displayIndex];
-        text(`로드된 시퀀스: ${sequenceNumbers.length}개 숫자`, infoX, infoY);
-        text(`현재 진행: ${displayIndex + 1}/${sequenceNumbers.length}`, infoX, infoY + 25);
-        text(`현재 값: ${currentVal !== undefined ? currentVal : '대기중'}`, infoX, infoY + 50);
+        seqDiv.innerHTML = 
+            `로드된 시퀀스: ${sequenceNumbers.length}개 숫자` +
+            `<br>현재 진행: ${displayIndex + 1}/${sequenceNumbers.length}` +
+            `<br>현재 값: ${currentVal !== undefined ? currentVal : '대기중'}`;
+        if (progressSlider) {
+            progressSlider.max = String(sequenceNumbers.length);
+            progressSlider.value = String(displayIndex + 1);
+        }
+        if (etaDiv) {
+            const totalSteps = Math.max(sequenceNumbers.length - 1, 0);
+            const doneSteps = Math.min(displayIndex, totalSteps);
+            if (emaMs !== null && totalSteps > 0) {
+                const estTotal = emaMs * totalSteps;
+                const estElapsed = emaMs * doneSteps;
+                const estRemain = Math.max(estTotal - estElapsed, 0);
+                etaDiv.textContent = `평균/스텝: ${Math.round(emaMs)} ms  |  총: ${formatTime(estTotal)}  |  남은: ${formatTime(estRemain)}`;
+            } else {
+                etaDiv.textContent = '예상 총 시간: -  | 남은: -';
+            }
+        }
     } else {
-        textAlign(LEFT);
-        text('시퀀스 파일을 로드해주세요', windowWidth*0.15, 60);
+        seqDiv.innerHTML = '시퀀스 파일을 로드해주세요';
+        if (progressSlider) {
+            progressSlider.max = '0';
+            progressSlider.value = '0';
+        }
+        if (etaDiv) {
+            etaDiv.textContent = '예상 총 시간: -  | 남은: -';
+        }
     }
+}
+
+function formatTime(ms) {
+    const s = Math.round(ms / 1000);
+    const hh = Math.floor(s / 3600);
+    const mm = Math.floor((s % 3600) / 60);
+    const ss = s % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
 }
 
 // 파일 선택 처리
@@ -384,6 +467,16 @@ function handleArduinoResponse(data) {
         // per-step progress during bulk: advance UI index
         if (bulkSending) {
             currentSequenceIndex = Math.min(currentSequenceIndex + 1, sequenceNumbers.length - 1);
+            // 시간 추정 업데이트
+            try {
+                const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+                if (progLastTs > 0) {
+                    const dt = now - progLastTs;
+                    if (emaMs === null) emaMs = dt; else emaMs = emaMs * 0.9 + dt * 0.1;
+                    progCount++;
+                }
+                progLastTs = now;
+            } catch(e) { /* ignore */ }
             changeData();
             updateDisplay();
         }
@@ -423,6 +516,8 @@ async function startBulkTransfer() {
     totalLength = sequenceNumbers.length;
     bulkOffset = 0;
     bulkSending = true;
+    // 시간 추정 리셋
+    progLastTs = 0; progCount = 0; emaMs = null;
     // 1) send PINS
     await serialWriter.write(new TextEncoder().encode(`PINS:${Pins}\n`));
     // 2) send LEN (optional)
@@ -544,10 +639,5 @@ async function advanceSequence() {
 
 
 // 윈도우 리사이즈 처리
-function windowResized() {
-    adaptWidth = windowWidth;
-    adaptHeight = windowHeight;
-    resizeCanvas(adaptWidth, adaptHeight);
-    updateDisplay();
-}
+// windowResized(): removed (p5 제거)
 
