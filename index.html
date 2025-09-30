@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>String Art Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 32px 24px 16px 24px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    header svg {
+      width: 56px;
+      height: 56px;
+    }
+    .site-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+    .site-desc {
+      font-size: 1.1rem;
+      color: #666;
+      margin-top: 4px;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px 16px 16px;
+    }
+    .main-action {
+      margin: 32px 0 48px 0;
+      text-align: center;
+    }
+    .main-action button {
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      padding: 16px 40px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(108,99,255,0.08);
+      transition: background 0.2s;
+    }
+    .main-action button:hover {
+      background: #554ee0;
+    }
+    .guestbook {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      padding: 24px 20px 16px 20px;
+      margin-bottom: 32px;
+    }
+    .guestbook-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #6c63ff;
+    }
+    .guestbook-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .guestbook-form input, .guestbook-form textarea {
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .guestbook-form input:focus, .guestbook-form textarea:focus {
+      border: 1.5px solid #6c63ff;
+    }
+    .guestbook-form button {
+      align-self: flex-end;
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+    .guestbook-form button:hover {
+      background: #554ee0;
+    }
+    .guestbook-entry {
+      border-bottom: 1px solid #f1f1f1;
+      padding: 8px 0;
+    }
+    .guestbook-entry:last-child {
+      border-bottom: none;
+    }
+    .guestbook-entry .name {
+      font-weight: 700;
+      color: #444;
+      margin-right: 8px;
+    }
+    .guestbook-entry .date {
+      font-size: 0.85em;
+      color: #aaa;
+      margin-left: 6px;
+    }
+    .guestbook-entry .msg {
+      margin-top: 2px;
+      color: #333;
+      white-space: pre-line;
+    }
+    footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 0.95rem;
+      padding: 18px 0 10px 0;
+      background: none;
+    }
+    @media (max-width: 600px) {
+      header { flex-direction: column; gap: 8px; padding: 18px 8px 8px 8px; }
+      .site-title { font-size: 1.3rem; }
+      main { padding: 12px 2px 2px 2px; }
+      .main-columns { flex-direction: column; gap: 16px; }
+      .guestbook, .resource-section { max-width: 100%; }
+      .guestbook { padding: 12px 4px 8px 4px; }
+    }
+    .main-columns {
+      display: flex;
+      flex-direction: row;
+      gap: 32px;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto 32px auto;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .main-columns .guestbook, .main-columns .resource-section {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .resource-section { max-width: 600px; margin: 0 auto 32px auto; background: #fff; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); padding: 24px 20px 16px 20px; }
+    .resource-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; color: #6c63ff; }
+    .resource-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+    .resource-list { margin-top: 10px; }
+    .resource-item { border-bottom: 1px solid #f1f1f1; padding: 8px 0; }
+    .resource-notice { background: #f8f1ff; color: #6c63ff; padding: 8px; border-radius: 8px; margin-bottom: 10px; }
+    .resource-meta { margin-bottom: 4px; }
+    .resource-type { background: #6c63ff; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 8px; }
+    .resource-title { font-weight: 600; color: #333; }
+    .resource-uploader { color: #666; font-size: 0.9em; margin-left: 8px; }
+    .resource-date { color: #999; font-size: 0.8em; margin-left: 8px; }
+    .resource-desc { color: #555; margin: 4px 0; font-size: 0.9em; }
+    .resource-link { margin-top: 6px; }
+    .resource-link a { color: #6c63ff; text-decoration: none; padding: 4px 8px; background: #f0f0ff; border-radius: 4px; display: inline-block; margin-right: 8px; }
+    .resource-link a:hover { background: #e0e0ff; }
+    
+    /* Category button styles */
+    .resource-categories {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .category-btn {
+      background: #f0f0f0;
+      color: #666;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .category-btn:hover {
+      background: #e0e0e0;
+    }
+    
+    .category-btn.active {
+      background: #6c63ff;
+      color: white;
+      border-color: #6c63ff;
+    }
+    
+    /* Category select styles */
+    .resource-form select {
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border 0.2s;
+      background: white;
+    }
+    
+    .resource-form select:focus {
+      border: 1.5px solid #6c63ff;
+    }
+    
+    /* Image slider styles */
+    .image-slider-container {
+      width: 100%;
+      height: 20vh;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin-bottom: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .image-slider {
+      display: flex;
+      height: 100%;
+      animation: slideLeft 30s linear infinite;
+      align-items: center;
+    }
+    
+    .image-slider img {
+      height: 80%;
+      width: auto;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 0 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+    
+    .image-slider img:hover {
+      transform: scale(1.05);
+    }
+    
+    @keyframes slideLeft {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+    
+    .slider-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 0 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- SVG logo -->
+    <span id="logo"></span>
+    <div>
+      <div class="site-title">String Art Gallery</div>
+      <div class="site-desc">Welcome to the world of String Art — art drawn with thread!</div>
+    </div>
+  </header>
+  <main>
+    <!-- Image slider -->
+    <div class="image-slider-container">
+      <div class="image-slider" id="image-slider">
+        <!-- Images will be loaded dynamically -->
+      </div>
+    </div>
+    
+    <div class="main-action">
+      <button onclick="location.href='indexstringart.html'" style="margin-left:16px;background:#ffb347;">Start String Art</button>
+      <button onclick="location.href='circle_numbers_html_p_5.html'" style="margin-left:16px;background:#ffb347;">Circle Numbers image</button>
+      <button onclick="location.href='info.html'" style="margin-left:16px;background:#ffb347;">Info</button>
+      <button onclick="location.href='battle0_making.html'" style="margin-left:16px;background:#4CAF50;">Making of battle0</button>
+      <button onclick="location.href='index3d.html'" style="margin-left:16px;background:#4c74af;">3D View</button>
+      <button onclick="location.href='indexmaking.html'" style="margin-left:16px;background:#af9d4c;">the basic principle</button>
+      <button onclick="location.href='gallery.html'" style="margin-left:16px;background:#ff6b9d;">Gallery</button>
+    </div>
+    <div class="main-columns">
+      <section class="guestbook">
+        <div class="guestbook-title">Guestbook</div>
+        <form class="guestbook-form" id="guestbook-form">
+          <input type="text" id="guestbook-name" placeholder="Name" maxlength="12" required />
+          <textarea id="guestbook-msg" placeholder="Leave a message" rows="2" maxlength="1000" required></textarea>
+          <button type="submit">Submit</button>
+        </form>
+        <div class="guestbook-list" id="guestbook-list"></div>
+      </section>
+      <section class="resource-section">
+        <div class="resource-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Resources</span>
+          <button onclick="location.href='indexresource.html'" style="background:#6c63ff;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;">Go to Resources</button>
+        </div>
+        <div class="resource-notice">Uploads are not supported. Please view resources on a separate page.</div>
+      </section>
+    </div>
+  </main>
+  <footer>
+    &copy; 2024 String Art Gallery. All rights reserved.
+  </footer>
+  <script type="module">
+    // Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDc_s6XoTGSws8211lGSCS03RTP6t_CgMs",
+      authDomain: "stringphotokr.firebaseapp.com",
+      projectId: "stringphotokr",
+      storageBucket: "stringphotokr.firebasestorage.app",
+      messagingSenderId: "159224274999",
+      appId: "1:159224274999:web:c15b0311931d2a98171fb2",
+      measurementId: "G-P906LHL215"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch(e) {}
+    const db = getFirestore(app);
+    // Insert SVG logo dynamically
+    fetch('resources/smallholder.svg').then(r=>r.text()).then(svg=>{
+      document.getElementById('logo').innerHTML = svg;
+    });
+
+    // Image slider functionality
+    function loadSliderImages() {
+      const sliderContainer = document.getElementById('image-slider');
+      
+      // Function to load image files from the showbox folder
+      function loadImagesFromShowbox() {
+        // Common image filenames (likely uploaded names)
+        const commonImageNames = [];
+
+        for(let i=0;i<100;i++) {
+            commonImageNames.push('image'+i+'.png');
+        }
+        
+        let loadedImages = [];
+        let checkedCount = 0;
+        
+        function checkNextImage() {
+          if (checkedCount >= commonImageNames.length) {
+            // If all images are checked and none loaded, show placeholder
+            if (loadedImages.length === 0) {
+              sliderContainer.innerHTML = '<div class="slider-placeholder">Please upload images to the showbox folder<br><small>Supported formats: JPG, PNG, GIF, WEBP</small><br><small>Filename examples: image1.jpg, photo.png, 1.jpg</small></div>';
+            } else {
+              createSliderWithImages(loadedImages);
+            }
+            return;
+          }
+          
+          const imgSrc = 'showbox/' + commonImageNames[checkedCount];
+          const testImage = new Image();
+          
+          testImage.onload = function() {
+            loadedImages.push(imgSrc);
+            checkedCount++;
+            checkNextImage();
+          };
+          
+          testImage.onerror = function() {
+            checkedCount++;
+            checkNextImage();
+          };
+          
+          testImage.src = imgSrc;
+        }
+        
+        function createSliderWithImages(imageList) {
+          if (imageList && imageList.length > 0) {
+            let html = '';
+            // Duplicate images multiple times to create an infinite loop effect
+            for (let i = 0; i < 3; i++) {
+              imageList.forEach(imgSrc => {
+                html += `<img src="${imgSrc}" alt="String Art Gallery" onerror="this.style.display='none'">`;
+              });
+            }
+            sliderContainer.innerHTML = html;
+          }
+        }
+        
+        // Start image checking
+        checkNextImage();
+      }
+      
+      // Load images on page load
+      loadImagesFromShowbox();
+    }
+
+    // Guestbook feature
+    const form = document.getElementById('guestbook-form');
+    const nameInput = document.getElementById('guestbook-name');
+    const msgInput = document.getElementById('guestbook-msg');
+    const listDiv = document.getElementById('guestbook-list');
+
+    async function loadEntries() {
+      const q = query(collection(db, 'guestbook'), orderBy('created_at', 'desc'));
+      const snap = await getDocs(q);
+      const entries = [];
+      snap.forEach(doc => {
+        const d = doc.data();
+        const ts = d.created_at && d.created_at.toDate ? d.created_at.toDate() : null;
+        const dateStr = ts ? ts.toISOString().replace('T',' ').slice(0,16) : '';
+        entries.push({ name: d.name || 'Anonymous', msg: d.msg || '', date: dateStr });
+      });
+      listDiv.innerHTML = entries.map(e => `
+        <div class="guestbook-entry">
+          <span class="name">${e.name}</span>
+          <span class="date">${e.date}</span>
+          <div class="msg">${e.msg}</div>
+        </div>
+      `).join('') || '<div style="color:#bbb;text-align:center;">No guestbook entries yet.</div>';
+    }
+
+    form.onsubmit = async function(e) {
+      e.preventDefault();
+      const name = nameInput.value.trim() || 'Anonymous';
+      const msg = msgInput.value.trim();
+      if (!msg) return;
+      await addDoc(collection(db, 'guestbook'), {
+        name,
+        msg,
+        created_at: serverTimestamp()
+      });
+      await loadEntries();
+      nameInput.value = '';
+      msgInput.value = '';
+    };
+
+    loadEntries();
+    // ===== Resources feature =====
+    let currentCategory = 'all';
+    
+    // Category configuration - customizable
+    // Key: stored value, Value: display name
+    const categories = {
+      'all': 'All',
+      'machine': 'Machine Build Resources',  // Resources for building string art machines
+      'request': 'Requests',      // Visitors' string art requests
+      'result': 'Results'         // Results for requested string art
+    };
+    
+    async function loadResources() {}
+
+    // Dynamically create category buttons
+    function createCategoryButtons() {
+      const container = document.querySelector('.resource-categories');
+      container.innerHTML = '';
+      
+      Object.entries(categories).forEach(([key, name]) => {
+        const btn = document.createElement('button');
+        btn.className = `category-btn ${key === 'all' ? 'active' : ''}`;
+        btn.setAttribute('data-category', key);
+        btn.textContent = name;
+        btn.addEventListener('click', function() {
+          // Remove the active class from all buttons
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          // Add the active class to the clicked button
+          this.classList.add('active');
+          // Load resources for the selected category
+          const category = this.getAttribute('data-category');
+          loadResources(category);
+        });
+        container.appendChild(btn);
+      });
+    }
+    
+    // Dynamically create category select options
+    function createCategoryOptions() {
+      const select = document.getElementById('resource-category');
+      select.innerHTML = '<option value="">Select a category</option>';
+      
+      Object.entries(categories).forEach(([key, name]) => {
+        if (key !== 'all') { // Exclude 'All' from select options
+          const option = document.createElement('option');
+          option.value = key;
+          option.textContent = name;
+          select.appendChild(option);
+        }
+      });
+    }
+
+    /* Upload feature removed */
+
+    // Initialize resources section
+    createCategoryButtons();
+    createCategoryOptions();
+    loadResources();
+    
+    // Initialize image slider
+    loadSliderImages();
+  </script>
+</body>
+</html> 
