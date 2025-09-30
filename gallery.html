@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Making Gallery - String Art</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 24px 32px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    header svg {
+      width: 48px;
+      height: 48px;
+    }
+    
+    .site-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #6c63ff;
+    }
+    
+    .back-button {
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .back-button:hover {
+      background: #554ee0;
+    }
+    
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    
+    .gallery-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    
+    .gallery-header h1 {
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 12px;
+    }
+    
+    .gallery-header p {
+      font-size: 1.1rem;
+      color: #666;
+    }
+    
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+    
+    .gallery-item {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .gallery-item:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    
+    .media-container {
+      width: 100%;
+      height: 300px;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .media-container img,
+    .media-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .placeholder {
+      color: #999;
+      font-size: 1rem;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .item-description {
+      padding: 20px;
+    }
+    
+    .item-description h3 {
+      font-size: 1.2rem;
+      color: #333;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+    
+    .item-description p {
+      font-size: 0.95rem;
+      color: #666;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+    
+    .item-date {
+      font-size: 0.85rem;
+      color: #999;
+      margin-top: 12px;
+      font-style: italic;
+    }
+    
+    .empty-message {
+      text-align: center;
+      padding: 80px 20px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    
+    .empty-message h2 {
+      font-size: 1.8rem;
+      color: #666;
+      margin-bottom: 16px;
+    }
+    
+    .empty-message p {
+      font-size: 1.1rem;
+      color: #999;
+      line-height: 1.8;
+    }
+    
+    footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 0.9rem;
+      padding: 24px 0;
+      background: none;
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        padding: 16px;
+      }
+      
+      .gallery-header h1 {
+        font-size: 2rem;
+      }
+      
+      .gallery-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      
+      .media-container {
+        height: 250px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <span id="logo"></span>
+      <div class="site-title">Making Gallery</div>
+    </div>
+    <button class="back-button" onclick="location.href='index.html'">← Back to Home</button>
+  </header>
+  
+  <main>
+    <div class="gallery-header">
+      <h1>제작 과정 갤러리</h1>
+      <p>String Art 제작 과정의 이미지와 영상들을 만나보세요</p>
+    </div>
+    
+    <div class="gallery-grid" id="gallery-grid">
+      <!-- Gallery items will be loaded here -->
+    </div>
+    
+    <div class="empty-message" id="empty-message" style="display: none;">
+      <h2>아직 갤러리가 비어있어요</h2>
+      <p>
+        <strong>gallery_images</strong> 폴더에 이미지를 업로드하거나<br>
+        <strong>gallery_videos</strong> 폴더에 영상을 업로드해주세요.<br><br>
+        파일명 예시: img1.jpg, photo.png, video1.mp4 등
+      </p>
+    </div>
+  </main>
+  
+  <footer>
+    &copy; 2024 String Art Gallery. All rights reserved.
+  </footer>
+  
+  <script>
+    // SVG 로고 동적 삽입
+    fetch('resources/smallholder.svg').then(r=>r.text()).then(svg=>{
+      document.getElementById('logo').innerHTML = svg;
+    }).catch(() => {
+      // SVG 로드 실패시 처리
+      document.getElementById('logo').style.display = 'none';
+    });
+    
+    // 갤러리 데이터 (여기에 이미지/영상과 설명을 추가하세요)
+    const galleryItems = [
+      {
+        type: 'image', // 'image' or 'video'
+        file: 'gallery_images/20250825_103238.jpg',
+        title: '레이저 커팅',
+        description: '6mm MDF 기반 프레임 제작',
+        date: '2025-08-25'
+      },
+      {
+        type: 'image', // 'image' or 'video'
+        file: 'gallery_images/20250825_103913.jpg',
+        title: '레이저 커팅',
+        description: '6mm MDF 기반 프레임 제작',
+        date: '2025-08-25'
+      },
+      {
+        type: 'image', // 'image' or 'video'
+        file: 'gallery_images/20250825_110552.jpg',
+        title: '레이저 커팅',
+        description: '6mm MDF 기반 프레임 제작',
+        date: '2025-08-25'
+      },
+      {
+        type: 'image', // 'image' or 'video'
+        file: 'gallery_images/20250825_111653.jpg',
+        title: '레이저 커팅',
+        description: '1mm 포맥스 보드 회전판 제작',
+        date: '2025-08-25'
+      },
+      {
+        type: 'image', // 'image' or 'video'
+        file: 'gallery_images/20250825_111658.jpg',
+        title: '레이저 커팅',
+        description: '1mm 포맥스 보드 회전판 제작',
+        date: '2025-08-25'
+      },
+      {
+        type: 'image', // 'image' or 'video'
+        file: 'gallery_images/20250907_145456.jpg',
+        title: '배경 재료',
+        description: '폴리 계열의 반투명 원단 사용',
+        date: '2025-09-07'
+      },
+      {
+        type: 'video',
+        file: 'gallery_videos/20250825_102551.mp4',
+        title: '레이저 커팅',
+        description: '6mm MDF 기반 프레임 제작',
+        date: '2025-08-25'
+      },
+      {
+        type: 'video',
+        file: 'gallery_videos/20250914_182306.mp4',
+        title: '타이밍 테스트',
+        description: '제작 시간 줄이기 위해 타이밍 테스트',
+        date: '2025-09-14'
+      }
+      // 여기에 더 많은 항목을 추가하세요
+    ];
+    
+    // 갤러리 로드 함수
+    function loadGallery() {
+      const galleryGrid = document.getElementById('gallery-grid');
+      const emptyMessage = document.getElementById('empty-message');
+      
+      if (galleryItems.length === 0) {
+        galleryGrid.style.display = 'none';
+        emptyMessage.style.display = 'block';
+        return;
+      }
+      
+      galleryGrid.innerHTML = '';
+      emptyMessage.style.display = 'none';
+      
+      galleryItems.forEach((item, index) => {
+        const galleryItem = document.createElement('div');
+        galleryItem.className = 'gallery-item';
+        
+        let mediaHTML = '';
+        if (item.type === 'image') {
+          mediaHTML = `<img src="${item.file}" alt="${item.title}" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'>이미지를 찾을 수 없습니다</div>'">`;
+        } else if (item.type === 'video') {
+          mediaHTML = `<video src="${item.file}" controls onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'>영상을 찾을 수 없습니다</div>'"></video>`;
+        }
+        
+        galleryItem.innerHTML = `
+          <div class="media-container">
+            ${mediaHTML}
+          </div>
+          <div class="item-description">
+            <h3>${item.title || '제목 없음'}</h3>
+            <p>${item.description || '설명이 없습니다.'}</p>
+            ${item.date ? `<div class="item-date">${item.date}</div>` : ''}
+          </div>
+        `;
+        
+        galleryGrid.appendChild(galleryItem);
+      });
+    }
+    
+    // 페이지 로드 시 갤러리 로드
+    loadGallery();
+  </script>
+</body>
+</html>
