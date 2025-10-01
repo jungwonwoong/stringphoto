@@ -14,7 +14,7 @@
             color: #333;
         }
         .container {
-            max-width: 1400px; /* 너비 확장 */
+            max-width: 1600px; /* 너비 확장 */
             margin: auto;
             padding: 20px;
         }
@@ -41,13 +41,13 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             border: 1px solid #eee;
         }
-        @media (min-width: 768px) {
+        @media (min-width: 1024px) {
             .process-step {
                 flex-direction: row;
             }
         }
         .media-container {
-            flex: 3; /* 30% 비율 */
+            flex: 2; /* 25% 비율 */
             min-width: 0;
         }
         .media-container img,
@@ -62,7 +62,31 @@
             cursor: pointer;
         }
         .description-container {
-            flex: 7; /* 70% 비율 */
+            flex: 4; /* 50% 비율 */
+            padding: 0 20px;
+        }
+        .youtube-container {
+            flex: 2; /* 25% 비율 */
+            min-width: 0;
+        }
+        .youtube-container iframe {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            border: none;
+        }
+        .youtube-placeholder {
+            width: 100%;
+            height: 200px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.9em;
+            text-align: center;
+            border: 2px dashed #ddd;
         }
         h2 {
             color: #007bff;
@@ -128,6 +152,19 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* 모바일 반응형 */
+        @media (max-width: 1023px) {
+            .description-container {
+                padding: 0;
+            }
+            .youtube-container iframe {
+                height: 180px;
+            }
+            .youtube-placeholder {
+                height: 180px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -154,6 +191,13 @@
                     To prepare the files for cutting, copy the components from each of the four quadrants into a new, separate file. Then, export each new file into DXF format to use with your laser cutter.
                 </p>
             </div>
+            <div class="youtube-container">
+                <!-- 유튜브 링크를 여기에 추가하세요 -->
+
+                <div class="youtube-placeholder">
+                    <iframe width="1296" height="729" src="https://www.youtube.com/embed/DT-GvYUE1N4" title="6-in-1 String Art Machine #021 #메이킹 #DIY #만들기 #stringartcrafts" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </div>
         </section>
 
         <!-- Step 2: Assemble the Frame -->
@@ -167,7 +211,14 @@
                     Position the components according to the holes, ensuring they are in the correct sequence. This is a crucial step for the main body assembly.
                 </p>
             </div>
+            <div class="youtube-container">
+                <!-- 유튜브 링크를 여기에 추가하세요 -->
+                <div class="youtube-placeholder">
+                    <iframe width="1296" height="729" src="https://www.youtube.com/embed/DT-GvYUE1N4" title="6-in-1 String Art Machine #021 #메이킹 #DIY #만들기 #stringartcrafts" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </div>
         </section>
+
         <!-- Step 3: Securing the Body -->
         <section class="process-step">
             <div class="media-container">
@@ -178,6 +229,12 @@
                 <p>
                     Prepare 7 Jenga blocks (75 x 25 x 15 mm). Create a Ø6mm, 20mm deep hole in each and insert an M4 insert nut. Secure the body using bolts, nuts, and washers as shown, and then assemble the 7 legs.
                 </p>
+            </div>
+            <div class="youtube-container">
+                <!-- 유튜브 링크를 여기에 추가하세요 -->
+                <div class="youtube-placeholder">
+                    <iframe width="1296" height="729" src="https://www.youtube.com/embed/DT-GvYUE1N4" title="6-in-1 String Art Machine #021 #메이킹 #DIY #만들기 #stringartcrafts" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
             </div>
         </section>
 
@@ -192,7 +249,14 @@
                     The frame uses Jenga blocks. To connect the step motor and slider, purchase a 40mm, M3 bolt separately. The previously connected bolt was too short to be used. You can secure the frame with wood glue and additionally drill holes for screws.
                 </p>
             </div>
+            <div class="youtube-container">
+                <!-- 유튜브 링크를 여기에 추가하세요 -->
+                <div class="youtube-placeholder">
+                    No video
+                </div>
+            </div>
         </section>
+
         <!-- Step 5: Needle linear movement modular -->
         <section class="process-step">
             <div class="media-container">
@@ -203,6 +267,13 @@
                 <p>
                     Please refer to the production <a href="https://youtu.be/Yj8ecijSFGo" target="_blank" download>video</a> of the previous version. The changed parts are a pillar made with a laser processing machine, a servomotor bracket printed with a 3D printer, and a linear bracket. Related files are in the data room.
                 </p>
+            </div>
+            <div class="youtube-container">
+                <!-- 유튜브 링크를 여기에 추가하세요 -->
+                <!-- 예시: <iframe src="https://www.youtube.com/embed/Yj8ecijSFGo" title="YouTube video player" allowfullscreen></iframe> -->
+                <div class="youtube-placeholder">
+                    <iframe width="1296" height="729" src="https://www.youtube.com/embed/Yj8ecijSFGo" title="스트링 아트 머신 만들기 #008 #메이킹 #DIY #만들기 #stringart" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
             </div>
         </section>
     </div>
